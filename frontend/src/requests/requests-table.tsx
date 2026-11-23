@@ -42,6 +42,9 @@ const SortableHead = ({
   )
 }
 
+// Smaller than the badge's own default size, specifically so this table never needs to scroll sideways.
+const TAG_SIZE = 'px-1.5 py-0.5 text-[11px] tracking-normal'
+
 export const RequestsTable = ({
   cases,
   sort,
@@ -51,7 +54,7 @@ export const RequestsTable = ({
   sort: SortState
   onSort: (column: SortColumn) => void
 }) => (
-  <Table>
+  <Table className="table-fixed">
     <TableCaption>
       FOI requests,{' '}
       {sort
@@ -73,22 +76,36 @@ export const RequestsTable = ({
 
         return (
           <TableRow key={foiCase.id}>
-            <TableCell>
+            <TableCell className="p-1.5">
               <Link to={`/requests/${foiCase.id}`} className="font-bold">
                 {foiCase.item.reference}
               </Link>
             </TableCell>
-            <TableCell className="max-w-xs truncate">{foiCase.item.subject || '-'}</TableCell>
-            <TableCell>{foiCase.item.received_at ? formatDate(foiCase.item.received_at) : 'Unknown'}</TableCell>
-            <TableCell>
+            <TableCell className="max-w-32 truncate p-1.5">{foiCase.item.subject || '-'}</TableCell>
+            <TableCell className="p-1.5 whitespace-normal">
+              {foiCase.item.received_at ? formatDate(foiCase.item.received_at) : 'Unknown'}
+            </TableCell>
+            <TableCell className="p-1.5 whitespace-normal">
               <div className="flex flex-col gap-1">
                 <span>{foiCase.deadline ? formatDate(foiCase.deadline) : '-'}</span>
-                {due && <Badge variant={due.variant}>{due.label}</Badge>}
+                {due && (
+                  <Badge variant={due.variant} className={TAG_SIZE}>
+                    {due.label}
+                  </Badge>
+                )}
               </div>
             </TableCell>
-            <TableCell>{foiCase.owner ?? <Badge variant="tag-grey">Unassigned</Badge>}</TableCell>
-            <TableCell>
-              <Badge variant={status.variant}>{status.label}</Badge>
+            <TableCell className="max-w-28 truncate p-1.5">
+              {foiCase.owner ?? (
+                <Badge variant="tag-grey" className={TAG_SIZE}>
+                  Unassigned
+                </Badge>
+              )}
+            </TableCell>
+            <TableCell className="p-1.5">
+              <Badge variant={status.variant} className={TAG_SIZE}>
+                {status.label}
+              </Badge>
             </TableCell>
           </TableRow>
         )

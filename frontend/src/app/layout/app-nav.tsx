@@ -16,7 +16,12 @@ export const AppNav = ({ onNavigate }: { onNavigate?: () => void }) => (
         to={to}
         end
         onClick={onNavigate}
-        className={({ isActive }) => cn('text-base text-[var(--govuk-link)] no-underline', isActive && 'font-bold')}
+        className={({ isActive }) =>
+          cn(
+            'text-base text-[var(--govuk-link)] visited:text-[var(--govuk-link)] no-underline hover:no-underline',
+            isActive && 'font-bold',
+          )
+        }
       >
         {label}
       </NavLink>
