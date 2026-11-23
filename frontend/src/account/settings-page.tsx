@@ -18,7 +18,7 @@ export const SettingsPage = () => {
   }
 
   return (
-    <div className="mx-auto grid max-w-3xl gap-6 px-4 py-6">
+    <div className="grid max-w-3xl gap-6 px-6 py-6">
       <div>
         <h1 className="text-4xl font-bold">Settings</h1>
         <p className="mt-1 text-muted-foreground">You sign in as {user.email}.</p>

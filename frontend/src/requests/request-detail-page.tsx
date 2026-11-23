@@ -63,11 +63,11 @@ export const RequestDetailPage = () => {
     if (feedback) feedbackRef.current?.focus()
   }, [feedback])
 
-  if (isPending) return <Skeleton className="mx-auto mt-6 h-96 max-w-5xl" />
+  if (isPending) return <Skeleton className="mt-6 h-96 max-w-5xl" />
 
   if (isError) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="max-w-5xl px-6 py-6">
         <EmptyState heading="Sorry, there is a problem with the service" body={error.message} />
       </div>
     )
@@ -80,7 +80,7 @@ export const RequestDetailPage = () => {
   const fail = (err: Error) => setFeedback({ type: 'error', message: err.message })
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 px-4 py-6">
+    <div className="grid max-w-5xl gap-6 px-6 py-6">
       <Link to="/" className="text-sm">
         &larr; Back to requests
       </Link>

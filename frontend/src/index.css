@@ -112,17 +112,22 @@ body {
   }
 }
 
-a {
-  color: var(--govuk-link);
-  text-decoration: underline;
-  text-underline-offset: 0.1em;
-}
-a:visited {
-  color: var(--govuk-link-visited);
-}
-a:hover {
-  color: var(--govuk-brand-dark);
-  text-decoration-thickness: 3px;
+/* In @layer base so a utility class (e.g. visited:text-[...] on a nav link) can actually override
+   this - an unlayered rule always beats a layered one regardless of specificity or source order,
+   and Tailwind's utilities live inside a layer. */
+@layer base {
+  a {
+    color: var(--govuk-link);
+    text-decoration: underline;
+    text-underline-offset: 0.1em;
+  }
+  a:visited {
+    color: var(--govuk-link-visited);
+  }
+  a:hover {
+    color: var(--govuk-brand-dark);
+    text-decoration-thickness: 3px;
+  }
 }
 
 /* Focus: yellow background, black text, thick black underline. Never remove. */
