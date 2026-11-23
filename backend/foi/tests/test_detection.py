@@ -48,6 +48,21 @@ class ScoreItemTests(SimpleTestCase):
 
         self.assertEqual(result.confidence, 'high')
 
+    def test_total_does_not_match_inside_totally(self):
+        result = score_item('Feedback', "I'm totally happy with the service, thanks!")
+
+        self.assertEqual(result.confidence, 'not_flagged')
+
+    def test_report_does_not_match_inside_reported(self):
+        result = score_item('Complaint', 'I already reported this pothole last week and nothing happened.')
+
+        self.assertEqual(result.confidence, 'not_flagged')
+
+    def test_a_year_mention_is_still_recognised_as_a_time_period(self):
+        result = score_item('FOI request', 'Please provide copies of all emails since 2023.')
+
+        self.assertIn('Covers a time period', result.reasons)
+
 
 class RealSampleDataTests(SimpleTestCase):
     """Sanity-checks the scorer against real messages from inbound/sample_data.csv."""

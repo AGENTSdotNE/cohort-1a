@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -62,26 +63,28 @@ class FOICaseViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def decide(self, request, pk=None):
-        case = self.get_object()
-
-        if case.status != FOICase.Status.POSSIBLE:
-            return Response({'detail': 'This case has already been decided.'}, status=status.HTTP_400_BAD_REQUEST)
-
         serializer = FOIDecisionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        case.decided_by = request.user
-        case.decided_at = timezone.now()
-
-        if serializer.validated_data['decision'] == 'confirm':
-            case.status = FOICase.Status.CONFIRMED
-            note = 'Confirmed as FOI.'
-        else:
-            case.status = FOICase.Status.NOT_FOI
-            case.department = serializer.validated_data['department']
-            note = f'Marked as not FOI and routed to {case.get_department_display()}.'
-
+        # Locks the row for the whole read-check-write so two concurrent decisions on the same case
+        # can't both pass the status check before either one writes.
         with transaction.atomic():
+            case = get_object_or_404(FOICase.objects.select_for_update(), pk=pk)
+
+            if case.status != FOICase.Status.POSSIBLE:
+                return Response({'detail': 'This case has already been decided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            case.decided_by = request.user
+            case.decided_at = timezone.now()
+
+            if serializer.validated_data['decision'] == 'confirm':
+                case.status = FOICase.Status.CONFIRMED
+                note = 'Confirmed as FOI.'
+            else:
+                case.status = FOICase.Status.NOT_FOI
+                case.department = serializer.validated_data['department']
+                note = f'Marked as not FOI and routed to {case.get_department_display()}.'
+
             case.save()
             FOIAction.objects.create(case=case, note=note, new_status=case.status, created_by=request.user)
 
@@ -89,20 +92,20 @@ class FOICaseViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='status')
     def change_status(self, request, pk=None):
-        case = self.get_object()
         serializer = FOIStatusChangeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         new_status = serializer.validated_data['status']
 
-        if FORWARD_STATUS_TRANSITIONS.get(case.status) != new_status:
-            return Response(
-                {'detail': f'Cannot move from "{case.get_status_display()}" to "{new_status}".'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        case.status = new_status
-
         with transaction.atomic():
+            case = get_object_or_404(FOICase.objects.select_for_update(), pk=pk)
+
+            if FORWARD_STATUS_TRANSITIONS.get(case.status) != new_status:
+                return Response(
+                    {'detail': f'Cannot move from "{case.get_status_display()}" to "{new_status}".'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            case.status = new_status
             case.save(update_fields=['status'])
             FOIAction.objects.create(
                 case=case, note=serializer.validated_data['note'], new_status=new_status, created_by=request.user

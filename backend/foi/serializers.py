@@ -7,6 +7,10 @@ from .flagging import create_manual_case
 from .models import Department, FOIAction, FOICase
 
 
+def _email_or_none(user):
+    return user.email if user else None
+
+
 class FOIActionSerializer(serializers.ModelSerializer):
     created_by = serializers.SerializerMethodField()
 
@@ -16,7 +20,7 @@ class FOIActionSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_created_by(self, action):
-        return action.created_by.email if action.created_by else None
+        return _email_or_none(action.created_by)
 
 
 class FOICaseSerializer(serializers.ModelSerializer):
@@ -48,10 +52,10 @@ class FOICaseSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_owner(self, case):
-        return case.owner.email if case.owner else None
+        return _email_or_none(case.owner)
 
     def get_decided_by(self, case):
-        return case.decided_by.email if case.decided_by else None
+        return _email_or_none(case.decided_by)
 
 
 class FOICaseOwnerSerializer(serializers.ModelSerializer):

@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass, field
 
 
@@ -6,6 +7,15 @@ class Check:
     points: int
     label: str
     phrases: list[str]
+
+    def __post_init__(self):
+        # \b keeps 'total' from matching inside 'totally', 'report' inside 'reported', etc. Phrases are
+        # plain regex fragments rather than escaped literals so a phrase can intentionally be a prefix,
+        # like 'since 20\d\d' below.
+        self._patterns = [re.compile(rf'\b{phrase}\b') for phrase in self.phrases]
+
+    def matches(self, text: str) -> bool:
+        return any(pattern.search(text) for pattern in self._patterns)
 
 
 POSITIVE_CHECKS = [
@@ -21,7 +31,7 @@ POSITIVE_CHECKS = [
         ['how many', 'how much', 'number of', 'total', 'cost of', 'spent', 'per year'],
     ),
     Check(2, 'Mentions the 20-day deadline', ['20 working days', 'within the statutory time']),
-    Check(1, 'Covers a time period', ['between', 'since 20', 'in the last', 'each year', 'for each year']),
+    Check(1, 'Covers a time period', ['between', r'since 20\d\d', 'in the last', 'each year', 'for each year']),
     Check(
         1,
         'Asks about how the council works',
@@ -67,7 +77,7 @@ class DetectionResult:
 
 
 def _matched_checks(text: str, checks: list[Check]) -> list[Check]:
-    return [check for check in checks if any(phrase in text for phrase in check.phrases)]
+    return [check for check in checks if check.matches(text)]
 
 
 def score_item(subject: str, message: str) -> DetectionResult:

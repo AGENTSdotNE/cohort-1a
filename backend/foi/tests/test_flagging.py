@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from io import StringIO
 
 from django.core.management import call_command
@@ -7,6 +7,7 @@ from django.test import TestCase
 from accounts.tests.factories import create_user
 from inbound.models import InboundItem
 
+from ..dates import calculate_deadline
 from ..flagging import auto_flag, create_manual_case
 from ..models import Department, FOICase
 
@@ -39,6 +40,17 @@ class SignalTests(TestCase):
         )
 
         self.assertIsNotNone(item.foi_case.deadline)
+
+    def test_deadline_uses_the_local_received_date_not_the_utc_date(self):
+        # 23:30 UTC in July is 00:30 the next day in Europe/London (BST, UTC+1) - a naive UTC .date()
+        # would compute the deadline from the wrong day.
+        item = create_item(
+            subject='FOI request',
+            message='Please provide the total spent on consultants.',
+            received_at=datetime(2026, 7, 14, 23, 30, tzinfo=UTC),
+        )
+
+        self.assertEqual(item.foi_case.deadline, calculate_deadline(date(2026, 7, 15)))
 
     def test_deadline_is_null_when_the_received_date_is_unknown(self):
         item = create_item(subject='FOI request', message='Please provide the total spent on consultants.')

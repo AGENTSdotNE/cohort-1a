@@ -75,6 +75,14 @@ class FOICaseListTests(APITestCase):
 
         self.assertTrue(response.data['is_overdue'])
 
+    def test_a_responded_case_past_deadline_is_still_overdue_until_closed(self):
+        # Intentional: "responded" doesn't clear overdue by itself, only "closed" does.
+        case = create_case(deadline=date.today() - timedelta(days=1), status=FOICase.Status.RESPONDED)
+
+        response = self.client.get(f'{URL}{case.id}/')
+
+        self.assertTrue(response.data['is_overdue'])
+
     def test_a_closed_case_is_never_overdue(self):
         create_case(deadline=date.today() - timedelta(days=1), status=FOICase.Status.CLOSED)
 

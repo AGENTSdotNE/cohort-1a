@@ -24,7 +24,7 @@ def auto_flag(item: InboundItem) -> FOICase | None:
             score=result.score,
             reasons=result.reasons,
             suggest_sar=result.suggest_sar,
-            deadline=calculate_deadline(item.received_at.date() if item.received_at else None),
+            deadline=calculate_deadline(timezone.localtime(item.received_at).date() if item.received_at else None),
         )
     except IntegrityError:
         # Another request flagged the same item first; the OneToOneField constraint is the real guard.
@@ -50,7 +50,9 @@ def create_manual_case(item: InboundItem, *, decision: str, user, department: st
                     confidence=FOICase.Confidence.MANUAL,
                     score=0,
                     reasons=['Manually flagged'],
-                    deadline=calculate_deadline(item.received_at.date() if item.received_at else None),
+                    deadline=calculate_deadline(
+                        timezone.localtime(item.received_at).date() if item.received_at else None
+                    ),
                 )
                 note = 'Manually flagged as possible FOI.'
             else:

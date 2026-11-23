@@ -8,6 +8,7 @@ class Command(BaseCommand):
     help = 'Create FOI cases for any inbound items that look like FOI requests but do not have one yet.'
 
     def handle(self, *args, **options):
-        created = sum(1 for item in InboundItem.objects.all() if auto_flag(item) is not None)
+        items = InboundItem.objects.filter(foi_case__isnull=True)
+        created = sum(1 for item in items if auto_flag(item) is not None)
 
         self.stdout.write(f'{created} new FOI case(s) created.')
