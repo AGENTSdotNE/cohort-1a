@@ -49,36 +49,49 @@ def create_manual_case(item: InboundItem, *, decision: str, user, department: st
     if FOICase.objects.filter(item=item).exists():
         raise ValueError('This item already has a case.')
 
-    if decision == 'route' and not department:
-        raise ValueError('department is required to route an item.')
+    if decision == 'flag':
+        return _flag_manually(item, user)
 
-    if decision not in {'flag', 'route'}:
-        raise ValueError(f'Unknown decision: {decision}')
+    if decision == 'route':
+        if not department:
+            raise ValueError('department is required to route an item.')
 
+        return _route_manually(item, department, user)
+
+    raise ValueError(f'Unknown decision: {decision}')
+
+
+def _flag_manually(item: InboundItem, user) -> FOICase:
     try:
         with transaction.atomic():
-            if decision == 'flag':
-                case = FOICase.objects.create(
-                    item=item,
-                    confidence=FOICase.Confidence.MANUAL,
-                    score=0,
-                    reasons=['Manually flagged'],
-                    deadline=calculate_deadline(_received_date(item)),
-                )
-                note = 'Manually flagged as possible FOI.'
-            else:
-                case = FOICase.objects.create(
-                    item=item,
-                    status=FOICase.Status.NOT_FOI,
-                    confidence=FOICase.Confidence.MANUAL,
-                    score=0,
-                    reasons=['Manually marked as not FOI'],
-                    department=department,
-                    decided_by=user,
-                    decided_at=timezone.now(),
-                )
-                note = f'Manually marked as not FOI and routed to {case.get_department_display()}.'
+            case = FOICase.objects.create(
+                item=item,
+                confidence=FOICase.Confidence.MANUAL,
+                score=0,
+                reasons=['Manually flagged'],
+                deadline=calculate_deadline(_received_date(item)),
+            )
+            FOIAction.objects.create(case=case, note='Manually flagged as possible FOI.', created_by=user)
+    except IntegrityError:
+        raise ValueError('This item already has a case.') from None
 
+    return case
+
+
+def _route_manually(item: InboundItem, department: str, user) -> FOICase:
+    try:
+        with transaction.atomic():
+            case = FOICase.objects.create(
+                item=item,
+                status=FOICase.Status.NOT_FOI,
+                confidence=FOICase.Confidence.MANUAL,
+                score=0,
+                reasons=['Manually marked as not FOI'],
+                department=department,
+                decided_by=user,
+                decided_at=timezone.now(),
+            )
+            note = f'Manually marked as not FOI and routed to {case.get_department_display()}.'
             FOIAction.objects.create(case=case, note=note, created_by=user)
     except IntegrityError:
         raise ValueError('This item already has a case.') from None
