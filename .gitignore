@@ -20,3 +20,4 @@ coverage/
 .playwright-cli/
 
 *storybook.log
+temp/

@@ -2,29 +2,31 @@ from django.db import transaction
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import FOIAction, FOICase
 from .serializers import (
     FOIActionNoteSerializer,
-    FOICaseCreateSerializer,
     FOICaseOwnerSerializer,
     FOICaseSerializer,
     FOIDecisionSerializer,
     FOIStatusChangeSerializer,
 )
 
-# Status changes an officer can make through the /status/ action. possible/confirmed/not_foi are only
-# reached through /decide/ or manual creation.
+# Status changes an officer can make through the /status/ action. possible/confirmed are only
+# reached through /decide/; every case starts at possible or not_foi (see flagging.auto_flag).
 FORWARD_STATUS_TRANSITIONS = {
     FOICase.Status.CONFIRMED: FOICase.Status.RESPONDED,
     FOICase.Status.RESPONDED: FOICase.Status.CLOSED,
+    FOICase.Status.NOT_FOI: FOICase.Status.CLOSED,
 }
 
 
-class FOICaseViewSet(viewsets.ModelViewSet):
+class FOICaseViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
+):
     http_method_names = ['get', 'post', 'patch']
 
     def get_queryset(self):
@@ -40,18 +42,9 @@ class FOICaseViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'create':
-            return FOICaseCreateSerializer
         if self.action == 'partial_update':
             return FOICaseOwnerSerializer
         return FOICaseSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        case = serializer.save()
-
-        return Response(FOICaseSerializer(case).data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
         case = self.get_object()
@@ -105,11 +98,29 @@ class FOICaseViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            if new_status == FOICase.Status.CLOSED:
+                case.status_before_close = case.status
+
             case.status = new_status
-            case.save(update_fields=['status'])
+            case.save(update_fields=['status', 'status_before_close'])
             FOIAction.objects.create(
                 case=case, note=serializer.validated_data['note'], new_status=new_status, created_by=request.user
             )
+
+        return Response(FOICaseSerializer(case).data)
+
+    @action(detail=True, methods=['post'])
+    def reopen(self, request, pk=None):
+        with transaction.atomic():
+            case = get_object_or_404(FOICase.objects.select_for_update(), pk=pk)
+
+            if case.status != FOICase.Status.CLOSED:
+                return Response({'detail': 'This case is not closed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            case.status = case.status_before_close
+            case.status_before_close = ''
+            case.save(update_fields=['status', 'status_before_close'])
+            FOIAction.objects.create(case=case, note='Reopened.', new_status=case.status, created_by=request.user)
 
         return Response(FOICaseSerializer(case).data)
 

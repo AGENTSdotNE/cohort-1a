@@ -16,13 +16,14 @@ const schema = z.object({ full_name: z.string().trim().min(1, 'Enter your name')
 
 type Values = z.infer<typeof schema>
 
-export const ProfileForm = () => {
+export const ProfileForm = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const user = useUser()
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { full_name: user.full_name } })
 
   const { submit, error, isSubmitting } = useApiForm(form, async ({ full_name }) => {
     setSessionUser(await updateProfile(full_name))
     toast.success('Your name has been saved')
+    onSuccess?.()
   })
 
   return (

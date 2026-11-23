@@ -1,11 +1,11 @@
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from django.utils import timezone
 
 from inbound.models import InboundItem
 
 from .dates import calculate_deadline
 from .detection import score_item
-from .models import FOIAction, FOICase
+from .models import FOICase
 
 
 def _received_date(item: InboundItem):
@@ -22,17 +22,19 @@ def _received_date(item: InboundItem):
 
 
 def auto_flag(item: InboundItem) -> FOICase | None:
+    """Score an inbound item and give it a case. Every item gets one - an officer is responsible for
+    closing out every message, FOI or not - but one that scores too low to need review lands
+    straight on "not FOI" rather than waiting in the review queue."""
     if FOICase.objects.filter(item=item).exists():
         return None
 
     result = score_item(item.subject, item.message)
-
-    if result.confidence == 'not_flagged':
-        return None
+    status = FOICase.Status.NOT_FOI if result.confidence == 'not_flagged' else FOICase.Status.POSSIBLE
 
     try:
         return FOICase.objects.create(
             item=item,
+            status=status,
             confidence=result.confidence,
             score=result.score,
             reasons=result.reasons,
@@ -42,58 +44,3 @@ def auto_flag(item: InboundItem) -> FOICase | None:
     except IntegrityError:
         # Another request flagged the same item first; the OneToOneField constraint is the real guard.
         return None
-
-
-def create_manual_case(item: InboundItem, *, decision: str, user, department: str = '') -> FOICase:
-    """Let a receiving-party officer flag an item the detector missed, or route a non-FOI item straight away."""
-    if FOICase.objects.filter(item=item).exists():
-        raise ValueError('This item already has a case.')
-
-    if decision == 'flag':
-        return _flag_manually(item, user)
-
-    if decision == 'route':
-        if not department:
-            raise ValueError('department is required to route an item.')
-
-        return _route_manually(item, department, user)
-
-    raise ValueError(f'Unknown decision: {decision}')
-
-
-def _flag_manually(item: InboundItem, user) -> FOICase:
-    try:
-        with transaction.atomic():
-            case = FOICase.objects.create(
-                item=item,
-                confidence=FOICase.Confidence.MANUAL,
-                score=0,
-                reasons=['Manually flagged'],
-                deadline=calculate_deadline(_received_date(item)),
-            )
-            FOIAction.objects.create(case=case, note='Manually flagged as possible FOI.', created_by=user)
-    except IntegrityError:
-        raise ValueError('This item already has a case.') from None
-
-    return case
-
-
-def _route_manually(item: InboundItem, department: str, user) -> FOICase:
-    try:
-        with transaction.atomic():
-            case = FOICase.objects.create(
-                item=item,
-                status=FOICase.Status.NOT_FOI,
-                confidence=FOICase.Confidence.MANUAL,
-                score=0,
-                reasons=['Manually marked as not FOI'],
-                department=department,
-                decided_by=user,
-                decided_at=timezone.now(),
-            )
-            note = f'Manually marked as not FOI and routed to {case.get_department_display()}.'
-            FOIAction.objects.create(case=case, note=note, created_by=user)
-    except IntegrityError:
-        raise ValueError('This item already has a case.') from None
-
-    return case

@@ -4,12 +4,11 @@ from io import StringIO
 from django.core.management import call_command
 from django.test import TestCase
 
-from accounts.tests.factories import create_user
 from inbound.models import InboundItem
 
 from ..dates import calculate_deadline
-from ..flagging import auto_flag, create_manual_case
-from ..models import Department, FOICase
+from ..flagging import auto_flag
+from ..models import FOICase
 
 
 def create_item(reference='EM-1', subject='', message='', received_at=None, **extra):
@@ -27,10 +26,11 @@ class SignalTests(TestCase):
         self.assertEqual(item.foi_case.status, FOICase.Status.POSSIBLE)
         self.assertIn('Mentions FOI or the Act', item.foi_case.reasons)
 
-    def test_a_routine_item_gets_no_case(self):
+    def test_a_routine_item_still_gets_a_case_landing_straight_on_not_foi(self):
         item = create_item(subject='Bins', message='When is my bin collected?')
 
-        self.assertFalse(FOICase.objects.filter(item=item).exists())
+        self.assertEqual(item.foi_case.status, FOICase.Status.NOT_FOI)
+        self.assertEqual(item.foi_case.confidence, FOICase.Confidence.NOT_FLAGGED)
 
     def test_deadline_is_calculated_from_the_received_date(self):
         item = create_item(
@@ -91,40 +91,3 @@ class RescanForiCommandTests(TestCase):
         call_command('rescan_foi', stdout=StringIO())
 
         self.assertEqual(FOICase.objects.count(), count_after_first_run)
-
-
-class CreateManualCaseTests(TestCase):
-    def setUp(self):
-        self.user = create_user()
-
-    def test_flagging_an_item_the_detector_missed(self):
-        item = create_item(subject='Bins', message='When is my bin collected?')
-
-        case = create_manual_case(item, decision='flag', user=self.user)
-
-        self.assertEqual(case.status, FOICase.Status.POSSIBLE)
-        self.assertEqual(case.confidence, FOICase.Confidence.MANUAL)
-        self.assertEqual(case.actions.get().created_by, self.user)
-
-    def test_routing_an_item_straight_to_a_department(self):
-        item = create_item(subject='Missed bin', message='My bin was not collected again.')
-
-        case = create_manual_case(item, decision='route', department=Department.WASTE, user=self.user)
-
-        self.assertEqual(case.status, FOICase.Status.NOT_FOI)
-        self.assertEqual(case.department, Department.WASTE)
-        self.assertEqual(case.decided_by, self.user)
-        self.assertIsNotNone(case.decided_at)
-        self.assertEqual(case.actions.get().created_by, self.user)
-
-    def test_routing_without_a_department_is_rejected(self):
-        item = create_item(subject='Missed bin', message='My bin was not collected again.')
-
-        with self.assertRaises(ValueError):
-            create_manual_case(item, decision='route', user=self.user)
-
-    def test_an_item_that_already_has_a_case_cannot_be_flagged_again(self):
-        item = create_item(subject='FOI request', message='Please provide the total spent on consultants.')
-
-        with self.assertRaises(ValueError):
-            create_manual_case(item, decision='flag', user=self.user)

@@ -4,11 +4,13 @@ Covers the two tickets built into `backend/foi/`: automatically flagging inbound
 FOI requests (with a reason), and tracking confirmed requests through to a response, with deadlines and
 a history of actions taken.
 
-## One app, one case per flagged item
+## One app, one case per item
 
-`FOICase` is a `OneToOneField` onto `InboundItem` ([models.py](../backend/foi/models.py)) - not every
-inbound item gets one, only items the detector (or a person) thinks are worth a second look. No case
-means "nothing to see here"; the item just sits in the plain inbound list.
+`FOICase` is a `OneToOneField` onto `InboundItem` ([models.py](../backend/foi/models.py)) - every
+inbound item gets exactly one. Every message needs someone to close it out eventually, FOI or not, so
+an item the detector doesn't flag lands straight on `not_foi` (confidence `not_flagged`) rather than
+having no case at all - it still needs an owner and a final close, it just skips the "is this FOI?"
+review step.
 
 `FOIAction` is an append-only history on a case: every status change and every freeform note a person
 adds, each with who did it and when.
@@ -31,7 +33,7 @@ sequenceDiagram
     Sig->>D: score(subject, message)
     D-->>Sig: confidence, score, reasons
     alt confidence == not_flagged
-        Sig--xC: no case created
+        Sig->>C: create (status=not_foi)
     else
         Sig->>C: create (status=possible)
     end
@@ -79,21 +81,30 @@ A naive (timezone-unaware) `received_at` - the one way that can happen is typing
 
 ```mermaid
 stateDiagram-v2
-    [*] --> possible: auto-flagged or manually flagged
+    [*] --> possible: scored as FOI-ish
+    [*] --> not_foi: scored not_flagged
     possible --> confirmed: POST /decide/ {confirm}
-    possible --> not_foi: POST /decide/ {route} or manual route
+    possible --> not_foi: POST /decide/ {route}
     confirmed --> responded: POST /status/ {responded, note}
     responded --> closed: POST /status/ {closed, note}
+    not_foi --> closed: POST /status/ {closed, note}
+    closed --> responded: POST /reopen/ (if it was responded)
+    closed --> not_foi: POST /reopen/ (if it was not_foi)
 ```
 
-Transitions are forward-only and audited: `/decide/` and `/status/` lock the case row for the whole
-read-check-write (`select_for_update()` inside `transaction.atomic()`), so two concurrent requests on the
-same case can't both pass the status check before either writes. Every transition writes an `FOIAction`
-row alongside the status change.
+Transitions are audited and locked the same way throughout: `/decide/`, `/status/` and `/reopen/` all
+lock the case row for the whole read-check-write (`select_for_update()` inside `transaction.atomic()`),
+so two concurrent requests on the same case can't both pass the status check before either writes. Every
+transition writes an `FOIAction` row alongside the status change.
 
-`is_overdue` is computed, not stored: the deadline has passed and the status isn't `closed` or `not_foi`.
-Note that a `responded` case still counts as overdue until it's `closed` - that's deliberate (a late
-response is still late until the case is actually closed out), not a bug.
+Closing is the one transition two different states lead into, so reopening needs to know which one to
+go back to. `status_before_close` snapshots the status right before it's overwritten with `closed`, and
+`/reopen/` restores it from there (then clears the snapshot).
+
+`is_overdue` is computed, not stored: the deadline has passed and the status isn't `closed`. Note that a
+`responded` case still counts as overdue until it's `closed` - that's deliberate (a late response is
+still late until the case is actually closed out), not a bug. A `not_foi` case is never overdue, since
+there's no FOI deadline to miss - but it still needs closing, see the lifecycle diagram above.
 
 ## What each endpoint does
 
@@ -102,9 +113,8 @@ case - there are no per-user inboxes, same reasoning as `/api/inbound/`.
 
 | Endpoint | Does |
 | --- | --- |
-| `GET /api/foi/` | list cases, optionally `?status=possible` etc. |
+| `GET /api/foi/` | list every case, optionally `?status=possible` etc. |
 | `GET /api/foi/<id>/` | one case, with its full action history |
-| `POST /api/foi/` | manually flag (`{item, decision: flag}`) or route (`{item, decision: route, department}`) an item the detector didn't create a case for |
 | `PATCH /api/foi/<id>/` | assign or clear the `owner` - the only field this accepts |
 | `POST /api/foi/<id>/decide/` | `{decision: confirm}` or `{decision: route, department}` - only while `status=possible` |
 | `POST /api/foi/<id>/status/` | `{status: responded\|closed, note}` - note required, forward-only |
@@ -113,10 +123,13 @@ case - there are no per-user inboxes, same reasoning as `/api/inbound/`.
 ## Known, deliberate limitations
 
 - **No SAR workflow.** The detector flags when a request looks like it's actually about the sender's own
-  data (`suggest_sar`), but that's only recorded when the item also gets a case for some other reason.
-  Neither ticket asked for subject-access-request tracking, so nothing was built to surface it on its
-  own.
+  data (`suggest_sar`), and that's always recorded on the case now that every item gets one - but
+  nothing in the UI surfaces it yet, since neither ticket asked for subject-access-request tracking.
+- **No manual flag/route.** Earlier there was a path for an officer to flag or route an item the
+  detector hadn't cased yet; once every item always gets a case immediately, there's never an item
+  without one for that to target, so it was removed rather than left unreachable.
 - **Bank holidays are England & Wales only**, 2025-2027. See `foi/dates.py` for how to extend the list.
-- **Status moves forward only.** There's no "un-confirm" or reopen-a-closed-case path.
+- **Status moves forward only, except reopening a closed case.** There's still no "un-confirm" path
+  (once confirmed, a case can't go back to possible).
 - **The Django admin is not the intended workflow.** It exists for inspecting data; `FOICaseAdmin`
   populates `created_by` on an inline-added action, but the real officer workflow is the API.

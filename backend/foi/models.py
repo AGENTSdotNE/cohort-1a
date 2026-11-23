@@ -28,11 +28,11 @@ class FOICase(models.Model):
         HIGH = 'high', 'High'
         MEDIUM = 'medium', 'Medium'
         UNCLEAR = 'unclear', 'Unclear'
-        MANUAL = 'manual', 'Manual'
+        NOT_FLAGGED = 'not_flagged', 'Not flagged'
 
     item = models.OneToOneField(InboundItem, on_delete=models.CASCADE, related_name='foi_case')
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.POSSIBLE)
-    confidence = models.CharField(max_length=10, choices=Confidence.choices)
+    confidence = models.CharField(max_length=15, choices=Confidence.choices)
     score = models.IntegerField()
     reasons = models.JSONField(default=list)
     # Set when the detector thinks this might really be a subject access request rather than FOI.
@@ -47,6 +47,9 @@ class FOICase(models.Model):
     )
     decided_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Snapshot of status just before closing, so reopening can put a case back where it was -
+    # responded and not_foi both lead to closed, so closed alone doesn't say which.
+    status_before_close = models.CharField(max_length=20, choices=Status.choices, blank=True)
 
     class Meta:
         ordering = ['-created_at']

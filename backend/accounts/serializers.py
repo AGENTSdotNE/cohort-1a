@@ -34,6 +34,15 @@ class UserSerializer(serializers.ModelSerializer):
         return user.avatar.url if user.avatar else None
 
 
+class UserSummarySerializer(serializers.ModelSerializer):
+    """Just enough to pick a person from a list, e.g. to assign them as an owner elsewhere."""
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'full_name']
+        read_only_fields = fields
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

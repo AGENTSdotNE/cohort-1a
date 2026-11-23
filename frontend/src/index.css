@@ -1,120 +1,157 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource-variable/geist';
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-}
-
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Fonts: Arial because we are not on service.gov.uk */
+  --font-sans: Arial, Helvetica, 'Liberation Sans', sans-serif;
+
+  /* Core GOV.UK colours */
+  --govuk-text: #0b0c0c;
+  --govuk-text-secondary: #484949;
+  --govuk-brand: #1d70b8; /* links, primary accents */
+  --govuk-brand-dark: #0f385c; /* header, hover on links */
+  --govuk-link: #1a65a6;
+  --govuk-link-visited: #54319f;
+  --govuk-focus: #ffdd00; /* focus background */
+  --govuk-focus-text: #0b0c0c;
+  --govuk-border: #cecece;
+  --govuk-input-border: #0b0c0c;
+  --govuk-page-bg: #f4f8fb;
+  --govuk-panel-bg: #f3f3f3;
+  --govuk-white: #ffffff;
+
+  /* Button colours: the real GOV.UK Design System values, including the button's own
+     bottom-shadow colour (the 2px "edge" every GOV.UK button has beneath it). */
+  --govuk-button: #00703c; /* green primary */
+  --govuk-button-hover: #005a30;
+  --govuk-button-shadow: #002d18;
+  --govuk-button-secondary: #f3f2f1;
+  --govuk-button-secondary-hover: #dbdad9;
+  --govuk-button-secondary-shadow: #929191;
+  --govuk-button-warning: #d4351c;
+  --govuk-button-warning-hover: #aa2a16;
+  --govuk-button-warning-shadow: #55150b;
+
+  /* Status tag pairs: text on background (all pass 4.5:1) */
+  --tag-blue-text: #16548a;
+  --tag-blue-bg: #d2e2f1; /* assigned, in progress */
+  --tag-green-text: #0b5c3e;
+  --tag-green-bg: #cfe4dc; /* closed, sent */
+  --tag-red-text: #982828;
+  --tag-red-bg: #f4d7d7; /* overdue */
+  --tag-orange-text: #7a3c1c;
+  --tag-orange-bg: #fde4d7; /* due soon */
+  --tag-yellow-text: #806f00;
+  --tag-yellow-bg: #fff8cc; /* needs review */
+  --tag-purple-text: #3f2577;
+  --tag-purple-bg: #ddd6ec; /* FOI flagged */
+  --tag-grey-text: #484949;
+  --tag-grey-bg: #f3f3f3; /* unassigned, none */
+
+  /* shadcn/ui variable mapping */
+  --background: var(--govuk-white);
+  --foreground: var(--govuk-text);
+  --card: var(--govuk-white);
+  --card-foreground: var(--govuk-text);
+  --popover: var(--govuk-white);
+  --popover-foreground: var(--govuk-text);
+  --primary: var(--govuk-button);
+  --primary-foreground: #ffffff;
+  --secondary: var(--govuk-button-secondary);
+  --secondary-foreground: var(--govuk-text);
+  --muted: var(--govuk-panel-bg);
+  --muted-foreground: var(--govuk-text-secondary);
+  --accent: var(--tag-blue-bg);
+  --accent-foreground: var(--tag-blue-text);
+  --destructive: var(--govuk-button-warning);
+  --border: var(--govuk-border);
+  --input: var(--govuk-input-border);
+  --ring: var(--govuk-focus);
+  --sidebar: var(--govuk-white);
+  --radius: 0; /* GOV.UK uses square corners */
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+@theme inline {
+  --font-sans: var(--font-sans);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  color: var(--govuk-text);
+  background: var(--background);
+}
+body {
+  font-size: 19px;
+  line-height: 25px;
+  margin: 0;
+}
+@media (max-width: 40.0525em) {
+  body {
+    font-size: 16px;
+    line-height: 20px;
+  }
+}
+
+/* In @layer base so a utility class (e.g. visited:text-[...] on a nav link) can actually override
+   this - an unlayered rule always beats a layered one regardless of specificity or source order,
+   and Tailwind's utilities live inside a layer. */
+@layer base {
+  a {
+    color: var(--govuk-link);
+    text-decoration: underline;
+    text-underline-offset: 0.1em;
+  }
+  a:visited {
+    color: var(--govuk-link-visited);
+  }
+  a:hover {
+    color: var(--govuk-brand-dark);
+    text-decoration-thickness: 3px;
+  }
+}
+
+/* Focus: yellow background, black text, thick black underline. Never remove. */
+:focus-visible {
+  outline: 3px solid transparent; /* shows in forced colours mode */
+  background-color: var(--govuk-focus);
+  color: var(--govuk-focus-text);
+  box-shadow:
+    0 -2px var(--govuk-focus),
+    0 4px var(--govuk-focus-text);
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @layer base {
