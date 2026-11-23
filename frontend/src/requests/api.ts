@@ -41,7 +41,13 @@ export const DEPARTMENTS = [
   { value: 'other', label: 'Other' },
 ]
 
+export type UserSummary = { id: number; email: string; full_name: string }
+
+export const fetchUsers = () => apiRequest<UserSummary[]>('/auth/users/')
+
 export const fetchFOICases = (status?: string) => apiRequest<FOICase[]>(`/foi/${status ? `?status=${status}` : ''}`)
+
+export const fetchFOICase = (id: number) => apiRequest<FOICase>(`/foi/${id}/`)
 
 export const createCase = (body: { item: number; decision: 'flag' | 'route'; department?: string }) =>
   apiRequest<FOICase>('/foi/', { body })

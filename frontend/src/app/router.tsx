@@ -7,9 +7,8 @@ import { ResetPasswordPage } from '@/auth/reset-password-page'
 import { SignInPage } from '@/auth/sign-in-page'
 import { SignUpPage } from '@/auth/sign-up-page'
 import { VerifyEmailPage } from '@/auth/verify-email-page'
-import { FOIPage } from '@/foi/foi-page'
-import { InboundPage } from '@/inbound/inbound-page'
-import { DashboardPage } from '@/pages/dashboard-page'
+import { DashboardPage } from '@/requests/dashboard-page'
+import { RequestDetailPage } from '@/requests/request-detail-page'
 
 import { AppShell } from './layout/app-shell'
 import { NotFoundPage } from './not-found-page'
@@ -27,8 +26,7 @@ export const AppRouter = () => (
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
-          <Route path="inbound" element={<InboundPage />} />
-          <Route path="foi" element={<FOIPage />} />
+          <Route path="requests/:id" element={<RequestDetailPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>
