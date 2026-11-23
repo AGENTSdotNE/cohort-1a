@@ -1,10 +1,9 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
 
 import type { UserSummary } from './api'
 import { EMPTY_FILTERS, type Filters } from './filters-state'
-
-const SELECT_CLASS = 'h-10 rounded-none border-2 border-input bg-transparent px-2 text-sm'
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Any status' },
@@ -49,9 +48,9 @@ export const RequestFilters = ({
 
       <div className="grid gap-1">
         <Label htmlFor="status-filter">Status</Label>
-        <select
+        <Select
           id="status-filter"
-          className={SELECT_CLASS}
+          className="w-44"
           value={filters.status}
           onChange={(event) => onChange({ ...filters, status: event.target.value })}
         >
@@ -60,14 +59,14 @@ export const RequestFilters = ({
               {option.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="grid gap-1">
         <Label htmlFor="owner-filter">Owner</Label>
-        <select
+        <Select
           id="owner-filter"
-          className={SELECT_CLASS}
+          className="w-44"
           value={filters.owner}
           onChange={(event) => onChange({ ...filters, owner: event.target.value })}
         >
@@ -78,14 +77,14 @@ export const RequestFilters = ({
               {user.full_name || user.email}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="grid gap-1">
         <Label htmlFor="flag-filter">Flag</Label>
-        <select
+        <Select
           id="flag-filter"
-          className={SELECT_CLASS}
+          className="w-44"
           value={filters.flag}
           onChange={(event) => onChange({ ...filters, flag: event.target.value })}
         >
@@ -94,7 +93,7 @@ export const RequestFilters = ({
               {option.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {hasFilters && (
