@@ -19,6 +19,7 @@ superuser:
 seed:
 	docker compose exec backend uv run python manage.py seed
 	docker compose exec backend uv run python manage.py seed_inbound
+	docker compose exec backend uv run python manage.py rescan_foi
 
 backend:
 	cd backend && uv run python manage.py runserver
