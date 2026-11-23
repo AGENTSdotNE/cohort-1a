@@ -47,6 +47,9 @@ class FOICase(models.Model):
     )
     decided_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Snapshot of status just before closing, so reopening can put a case back where it was -
+    # responded and not_foi both lead to closed, so closed alone doesn't say which.
+    status_before_close = models.CharField(max_length=20, choices=Status.choices, blank=True)
 
     class Meta:
         ordering = ['-created_at']

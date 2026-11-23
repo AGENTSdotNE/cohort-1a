@@ -98,11 +98,29 @@ class FOICaseViewSet(
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            if new_status == FOICase.Status.CLOSED:
+                case.status_before_close = case.status
+
             case.status = new_status
-            case.save(update_fields=['status'])
+            case.save(update_fields=['status', 'status_before_close'])
             FOIAction.objects.create(
                 case=case, note=serializer.validated_data['note'], new_status=new_status, created_by=request.user
             )
+
+        return Response(FOICaseSerializer(case).data)
+
+    @action(detail=True, methods=['post'])
+    def reopen(self, request, pk=None):
+        with transaction.atomic():
+            case = get_object_or_404(FOICase.objects.select_for_update(), pk=pk)
+
+            if case.status != FOICase.Status.CLOSED:
+                return Response({'detail': 'This case is not closed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            case.status = case.status_before_close
+            case.status_before_close = ''
+            case.save(update_fields=['status', 'status_before_close'])
+            FOIAction.objects.create(case=case, note='Reopened.', new_status=case.status, created_by=request.user)
 
         return Response(FOICaseSerializer(case).data)
 

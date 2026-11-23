@@ -250,6 +250,39 @@ class StatusChangeTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
+class ReopenTests(APITestCase):
+    def setUp(self):
+        self.user = create_user()
+        self.client.force_authenticate(self.user)
+
+    def test_reopening_a_closed_foi_case_returns_it_to_responded(self):
+        case = create_case(status=FOICase.Status.RESPONDED)
+        self.client.post(f'{URL}{case.id}/status/', {'status': 'closed', 'note': 'Filed.'}, format='json')
+
+        response = self.client.post(f'{URL}{case.id}/reopen/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        case.refresh_from_db()
+        self.assertEqual(case.status, FOICase.Status.RESPONDED)
+
+    def test_reopening_a_closed_not_foi_case_returns_it_to_not_foi(self):
+        case = create_case(status=FOICase.Status.NOT_FOI)
+        self.client.post(f'{URL}{case.id}/status/', {'status': 'closed', 'note': 'Filed.'}, format='json')
+
+        response = self.client.post(f'{URL}{case.id}/reopen/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        case.refresh_from_db()
+        self.assertEqual(case.status, FOICase.Status.NOT_FOI)
+
+    def test_reopening_a_case_that_is_not_closed_is_rejected(self):
+        case = create_case(status=FOICase.Status.RESPONDED)
+
+        response = self.client.post(f'{URL}{case.id}/reopen/')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class AddActionTests(APITestCase):
     def setUp(self):
         self.user = create_user()

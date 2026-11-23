@@ -88,12 +88,18 @@ stateDiagram-v2
     confirmed --> responded: POST /status/ {responded, note}
     responded --> closed: POST /status/ {closed, note}
     not_foi --> closed: POST /status/ {closed, note}
+    closed --> responded: POST /reopen/ (if it was responded)
+    closed --> not_foi: POST /reopen/ (if it was not_foi)
 ```
 
-Transitions are forward-only and audited: `/decide/` and `/status/` lock the case row for the whole
-read-check-write (`select_for_update()` inside `transaction.atomic()`), so two concurrent requests on the
-same case can't both pass the status check before either writes. Every transition writes an `FOIAction`
-row alongside the status change.
+Transitions are audited and locked the same way throughout: `/decide/`, `/status/` and `/reopen/` all
+lock the case row for the whole read-check-write (`select_for_update()` inside `transaction.atomic()`),
+so two concurrent requests on the same case can't both pass the status check before either writes. Every
+transition writes an `FOIAction` row alongside the status change.
+
+Closing is the one transition two different states lead into, so reopening needs to know which one to
+go back to. `status_before_close` snapshots the status right before it's overwritten with `closed`, and
+`/reopen/` restores it from there (then clears the snapshot).
 
 `is_overdue` is computed, not stored: the deadline has passed and the status isn't `closed`. Note that a
 `responded` case still counts as overdue until it's `closed` - that's deliberate (a late response is
@@ -123,6 +129,7 @@ case - there are no per-user inboxes, same reasoning as `/api/inbound/`.
   detector hadn't cased yet; once every item always gets a case immediately, there's never an item
   without one for that to target, so it was removed rather than left unreachable.
 - **Bank holidays are England & Wales only**, 2025-2027. See `foi/dates.py` for how to extend the list.
-- **Status moves forward only.** There's no "un-confirm" or reopen-a-closed-case path.
+- **Status moves forward only, except reopening a closed case.** There's still no "un-confirm" path
+  (once confirmed, a case can't go back to possible).
 - **The Django admin is not the intended workflow.** It exists for inspecting data; `FOICaseAdmin`
   populates `created_by` on an inline-added action, but the real officer workflow is the API.
