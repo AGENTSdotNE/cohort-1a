@@ -8,7 +8,7 @@ const STATUS_TAGS: Record<FOIStatus, TagInfo> = {
   confirmed: { label: 'FOI', variant: 'tag-purple' },
   responded: { label: 'Responded', variant: 'tag-blue' },
   closed: { label: 'Closed', variant: 'tag-green' },
-  not_foi: { label: 'Reassigned', variant: 'tag-green' },
+  not_foi: { label: 'Not FOI', variant: 'tag-green' },
 }
 
 export const statusTag = (foiCase: FOICase): TagInfo => STATUS_TAGS[foiCase.status]

@@ -46,7 +46,7 @@
   --tag-grey-bg: #f3f3f3; /* unassigned, none */
 
   /* shadcn/ui variable mapping */
-  --background: var(--govuk-page-bg);
+  --background: var(--govuk-white);
   --foreground: var(--govuk-text);
   --card: var(--govuk-white);
   --card-foreground: var(--govuk-text);

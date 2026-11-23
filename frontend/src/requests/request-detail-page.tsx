@@ -204,7 +204,7 @@ export const RequestDetailPage = () => {
             <p className="border-t border-border pt-4 text-sm text-muted-foreground">
               {foiCase.decided_by && foiCase.decided_at
                 ? `Decided by ${foiCase.decided_by} on ${formatDate(foiCase.decided_at)}.`
-                : 'This case was flagged manually.'}
+                : 'The system did not flag this as a possible FOI request.'}
             </p>
           )}
 
@@ -280,7 +280,7 @@ export const RequestDetailPage = () => {
             <SummaryRow label="Status" value={<Badge variant={status.variant}>{status.label}</Badge>} />
           </dl>
 
-          {(foiCase.status === 'confirmed' || foiCase.status === 'responded') && (
+          {(foiCase.status === 'confirmed' || foiCase.status === 'responded' || foiCase.status === 'not_foi') && (
             <div className="grid gap-2 border-t border-border pt-4">
               <textarea
                 className="min-h-20 rounded-none border-2 border-input bg-transparent px-3 py-2 text-sm"

@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
+import { SettingsPage } from '@/account/settings-page'
 import { ForgotPasswordPage } from '@/auth/forgot-password-page'
 import { RequireAuth } from '@/auth/require-auth'
 import { ResendVerificationPage } from '@/auth/resend-verification-page'
@@ -27,6 +28,7 @@ export const AppRouter = () => (
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="requests/:id" element={<RequestDetailPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>

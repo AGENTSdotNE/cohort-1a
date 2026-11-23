@@ -12,7 +12,7 @@ const STATUS_OPTIONS = [
   { value: 'confirmed', label: 'FOI' },
   { value: 'responded', label: 'Responded' },
   { value: 'closed', label: 'Closed' },
-  { value: 'not_foi', label: 'Reassigned' },
+  { value: 'not_foi', label: 'Not FOI' },
 ]
 
 const FLAG_OPTIONS = [
@@ -20,7 +20,7 @@ const FLAG_OPTIONS = [
   { value: 'high', label: 'High confidence' },
   { value: 'medium', label: 'Medium confidence' },
   { value: 'unclear', label: 'Unclear' },
-  { value: 'manual', label: 'Manually flagged' },
+  { value: 'not_flagged', label: 'Not flagged' },
 ]
 
 export const RequestFilters = ({

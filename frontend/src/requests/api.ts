@@ -2,7 +2,7 @@ import type { InboundItem } from '@/inbound/api'
 import { apiRequest } from '@/lib/api-client'
 
 export type FOIStatus = 'possible' | 'confirmed' | 'responded' | 'closed' | 'not_foi'
-export type FOIConfidence = 'high' | 'medium' | 'unclear' | 'manual'
+export type FOIConfidence = 'high' | 'medium' | 'unclear' | 'not_flagged'
 
 export type FOIActionEntry = {
   id: number
@@ -48,9 +48,6 @@ export const fetchUsers = () => apiRequest<UserSummary[]>('/auth/users/')
 export const fetchFOICases = (status?: string) => apiRequest<FOICase[]>(`/foi/${status ? `?status=${status}` : ''}`)
 
 export const fetchFOICase = (id: number) => apiRequest<FOICase>(`/foi/${id}/`)
-
-export const createCase = (body: { item: number; decision: 'flag' | 'route'; department?: string }) =>
-  apiRequest<FOICase>('/foi/', { body })
 
 export const setOwner = (id: number, owner: number | null) =>
   apiRequest<FOICase>(`/foi/${id}/`, { method: 'PATCH', body: { owner } })

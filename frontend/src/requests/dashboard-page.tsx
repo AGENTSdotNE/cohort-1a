@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 
 import { EmptyState, NoMatchingResults, NoRequestsYet } from './empty-state'
 import { EMPTY_FILTERS, type Filters } from './filters-state'
-import { ManualFlagDialog } from './manual-flag-dialog'
 import { RequestFilters } from './request-filters'
 import { RequestsTable } from './requests-table'
 import { type SortColumn, sortRequests, type SortState } from './sorting'
@@ -85,7 +84,7 @@ export const DashboardPage = () => {
     return <EmptyState heading="Sorry, there is a problem with the service" body={error.message} />
   }
 
-  const openCount = cases.filter((foiCase) => !['closed', 'not_foi'].includes(foiCase.status)).length
+  const openCount = cases.filter((foiCase) => foiCase.status !== 'closed').length
   const overdueCount = cases.filter((foiCase) => foiCase.is_overdue).length
 
   const tiles = [
@@ -105,14 +104,11 @@ export const DashboardPage = () => {
 
   return (
     <div className="mx-auto grid max-w-5xl gap-6 px-4 py-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold">Requests</h1>
-          <p className="mt-1 text-muted-foreground">
-            {openCount} open, {overdueCount} overdue
-          </p>
-        </div>
-        <ManualFlagDialog />
+      <div>
+        <h1 className="text-4xl font-bold">Requests</h1>
+        <p className="mt-1 text-muted-foreground">
+          {openCount} open, {overdueCount} overdue
+        </p>
       </div>
 
       <StatTiles tiles={tiles} active={quickFilter} onSelect={handleQuickFilter} />
