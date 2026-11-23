@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { UserAvatar } from '@/components/user-avatar'
 import { clearSession } from '@/lib/query-client'
+import { cn } from '@/lib/utils'
 
-export const UserMenu = () => {
+export const UserMenu = ({ className }: { className?: string } = {}) => {
   const user = useUser()
   const [accountOpen, setAccountOpen] = useState(false)
 
@@ -29,7 +30,7 @@ export const UserMenu = () => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-9 gap-2 px-2">
+          <Button variant="ghost" className={cn('h-9 gap-2 px-2', className)}>
             <UserAvatar user={user} />
             <span className="sr-only text-sm sm:not-sr-only">{user.full_name || user.email}</span>
           </Button>

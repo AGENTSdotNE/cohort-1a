@@ -1,1 +1,1 @@
-export const APP_NAME = 'Cohort App'
+export const APP_NAME = 'Northeast Council FOI tracker'

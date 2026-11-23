@@ -13,7 +13,12 @@ export const MobileNav = () => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-white hover:bg-white/10 hover:text-white md:hidden"
+          aria-label="Open menu"
+        >
           <Menu />
         </Button>
       </SheetTrigger>

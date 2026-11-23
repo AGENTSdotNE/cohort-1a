@@ -15,18 +15,22 @@ const badgeVariants = cva(
         outline: 'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 [a&]:hover:underline',
-        // GOV.UK-style status tags: square corners, bold, text carries the meaning (never colour alone).
-        'tag-blue': 'rounded-none bg-[var(--tag-blue-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-blue-text)]',
+        // GOV.UK-style status tags: square corners, bold, uppercase - text carries the meaning
+        // (never colour alone), and design.md's typography rule allows all-caps for tags specifically.
+        'tag-blue':
+          'rounded-none bg-[var(--tag-blue-bg)] px-2 py-0.5 text-sm font-bold tracking-wide text-[var(--tag-blue-text)] uppercase',
         'tag-green':
-          'rounded-none bg-[var(--tag-green-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-green-text)]',
-        'tag-red': 'rounded-none bg-[var(--tag-red-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-red-text)]',
+          'rounded-none bg-[var(--tag-green-bg)] px-2 py-0.5 text-sm font-bold tracking-wide text-[var(--tag-green-text)] uppercase',
+        'tag-red':
+          'rounded-none bg-[var(--tag-red-bg)] px-2 py-0.5 text-sm font-bold tracking-wide text-[var(--tag-red-text)] uppercase',
         'tag-orange':
-          'rounded-none bg-[var(--tag-orange-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-orange-text)]',
+          'rounded-none bg-[var(--tag-orange-bg)] px-2 py-0.5 text-sm font-bold tracking-wide text-[var(--tag-orange-text)] uppercase',
         'tag-yellow':
-          'rounded-none bg-[var(--tag-yellow-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-yellow-text)]',
+          'rounded-none bg-[var(--tag-yellow-bg)] px-2 py-0.5 text-sm font-bold tracking-wide text-[var(--tag-yellow-text)] uppercase',
         'tag-purple':
-          'rounded-none bg-[var(--tag-purple-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-purple-text)]',
-        'tag-grey': 'rounded-none bg-[var(--tag-grey-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-grey-text)]',
+          'rounded-none bg-[var(--tag-purple-bg)] px-2 py-0.5 text-sm font-bold tracking-wide text-[var(--tag-purple-text)] uppercase',
+        'tag-grey':
+          'rounded-none bg-[var(--tag-grey-bg)] px-2 py-0.5 text-sm font-bold tracking-wide text-[var(--tag-grey-text)] uppercase',
       },
     },
     defaultVariants: {
