@@ -1,5 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
+import { ChangeAvatarPage } from '@/account/change-avatar-page'
+import { ChangeNamePage } from '@/account/change-name-page'
+import { ConfirmPasswordStep } from '@/account/change-password/confirm-password-step'
+import { CurrentPasswordStep } from '@/account/change-password/current-password-step'
+import { NewPasswordStep } from '@/account/change-password/new-password-step'
 import { SettingsPage } from '@/account/settings-page'
 import { ForgotPasswordPage } from '@/auth/forgot-password-page'
 import { RequireAuth } from '@/auth/require-auth'
@@ -29,6 +34,11 @@ export const AppRouter = () => (
           <Route index element={<DashboardPage />} />
           <Route path="requests/:id" element={<RequestDetailPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings/name" element={<ChangeNamePage />} />
+          <Route path="settings/avatar" element={<ChangeAvatarPage />} />
+          <Route path="settings/password" element={<CurrentPasswordStep />} />
+          <Route path="settings/password/new" element={<NewPasswordStep />} />
+          <Route path="settings/password/confirm" element={<ConfirmPasswordStep />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>
