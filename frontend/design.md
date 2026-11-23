@@ -24,20 +24,20 @@ Flow: **Dashboard (list) → Request detail → Assign / review forms**. Users: 
 Drop into `src/index.css`. Tailwind v4 style, with shadcn variable names mapped to GOV.UK colours.
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   /* Fonts: Arial because we are not on service.gov.uk */
-  --font-sans: Arial, Helvetica, "Liberation Sans", sans-serif;
+  --font-sans: Arial, Helvetica, 'Liberation Sans', sans-serif;
 
   /* Core GOV.UK colours */
   --govuk-text: #0b0c0c;
   --govuk-text-secondary: #484949;
-  --govuk-brand: #1d70b8;          /* links, primary accents */
-  --govuk-brand-dark: #0f385c;     /* header, hover on links */
+  --govuk-brand: #1d70b8; /* links, primary accents */
+  --govuk-brand-dark: #0f385c; /* header, hover on links */
   --govuk-link: #1a65a6;
   --govuk-link-visited: #54319f;
-  --govuk-focus: #ffdd00;          /* focus background */
+  --govuk-focus: #ffdd00; /* focus background */
   --govuk-focus-text: #0b0c0c;
   --govuk-border: #cecece;
   --govuk-input-border: #0b0c0c;
@@ -46,19 +46,26 @@ Drop into `src/index.css`. Tailwind v4 style, with shadcn variable names mapped 
   --govuk-white: #ffffff;
 
   /* Button colours */
-  --govuk-button: #0f7a52;         /* green primary */
+  --govuk-button: #0f7a52; /* green primary */
   --govuk-button-hover: #0b5c3e;
   --govuk-button-secondary: #f3f3f3;
   --govuk-button-warning: #ca3535;
 
   /* Status tag pairs: text on background (all pass 4.5:1) */
-  --tag-blue-text: #16548a;   --tag-blue-bg: #d2e2f1;     /* assigned, in progress */
-  --tag-green-text: #0b5c3e;  --tag-green-bg: #cfe4dc;    /* closed, sent */
-  --tag-red-text: #982828;    --tag-red-bg: #f4d7d7;      /* overdue */
-  --tag-orange-text: #7a3c1c; --tag-orange-bg: #fde4d7;   /* due soon */
-  --tag-yellow-text: #806f00; --tag-yellow-bg: #fff8cc;   /* needs review */
-  --tag-purple-text: #3f2577; --tag-purple-bg: #ddd6ec;   /* FOI flagged */
-  --tag-grey-text: #484949;   --tag-grey-bg: #f3f3f3;     /* unassigned, none */
+  --tag-blue-text: #16548a;
+  --tag-blue-bg: #d2e2f1; /* assigned, in progress */
+  --tag-green-text: #0b5c3e;
+  --tag-green-bg: #cfe4dc; /* closed, sent */
+  --tag-red-text: #982828;
+  --tag-red-bg: #f4d7d7; /* overdue */
+  --tag-orange-text: #7a3c1c;
+  --tag-orange-bg: #fde4d7; /* due soon */
+  --tag-yellow-text: #806f00;
+  --tag-yellow-bg: #fff8cc; /* needs review */
+  --tag-purple-text: #3f2577;
+  --tag-purple-bg: #ddd6ec; /* FOI flagged */
+  --tag-grey-text: #484949;
+  --tag-grey-bg: #f3f3f3; /* unassigned, none */
 
   /* shadcn/ui variable mapping */
   --background: var(--govuk-page-bg);
@@ -77,7 +84,7 @@ Drop into `src/index.css`. Tailwind v4 style, with shadcn variable names mapped 
   --border: var(--govuk-border);
   --input: var(--govuk-input-border);
   --ring: var(--govuk-focus);
-  --radius: 0;                      /* GOV.UK uses square corners */
+  --radius: 0; /* GOV.UK uses square corners */
 }
 
 @theme inline {
@@ -97,25 +104,52 @@ Drop into `src/index.css`. Tailwind v4 style, with shadcn variable names mapped 
   --radius-lg: 0;
 }
 
-html { font-family: var(--font-sans); color: var(--govuk-text); background: var(--background); }
-body { font-size: 19px; line-height: 25px; margin: 0; }
-@media (max-width: 40.0525em) { body { font-size: 16px; line-height: 20px; } }
+html {
+  font-family: var(--font-sans);
+  color: var(--govuk-text);
+  background: var(--background);
+}
+body {
+  font-size: 19px;
+  line-height: 25px;
+  margin: 0;
+}
+@media (max-width: 40.0525em) {
+  body {
+    font-size: 16px;
+    line-height: 20px;
+  }
+}
 
-a { color: var(--govuk-link); text-decoration: underline; text-underline-offset: 0.1em; }
-a:visited { color: var(--govuk-link-visited); }
-a:hover { color: var(--govuk-brand-dark); text-decoration-thickness: 3px; }
+a {
+  color: var(--govuk-link);
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+}
+a:visited {
+  color: var(--govuk-link-visited);
+}
+a:hover {
+  color: var(--govuk-brand-dark);
+  text-decoration-thickness: 3px;
+}
 
 /* Focus: yellow background, black text, thick black underline. Never remove. */
 :focus-visible {
-  outline: 3px solid transparent;       /* shows in forced colours mode */
+  outline: 3px solid transparent; /* shows in forced colours mode */
   background-color: var(--govuk-focus);
   color: var(--govuk-focus-text);
-  box-shadow: 0 -2px var(--govuk-focus), 0 4px var(--govuk-focus-text);
+  box-shadow:
+    0 -2px var(--govuk-focus),
+    0 4px var(--govuk-focus-text);
   text-decoration: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
@@ -127,14 +161,14 @@ Contrast checks (calculated, WCAG AA needs 4.5:1 for text): white on button gree
 
 Font: Arial. Sizes come from the GOV.UK type scale (large screens, over 640px; small screens in brackets).
 
-| Use | Class idea | Size / line height |
-| --- | --- | --- |
-| Page title | `heading-xl` | 48/50 (32/35), bold |
-| Section heading | `heading-l` | 36/40 (27/30), bold |
-| Card or panel heading | `heading-m` | 24/30 (21/25), bold |
-| Small heading, table header | `heading-s` | 19/25, bold |
-| Body | `body` | 19/25 |
-| Hint, secondary info, tags | `body-s` | 16/20 |
+| Use                         | Class idea   | Size / line height  |
+| --------------------------- | ------------ | ------------------- |
+| Page title                  | `heading-xl` | 48/50 (32/35), bold |
+| Section heading             | `heading-l`  | 36/40 (27/30), bold |
+| Card or panel heading       | `heading-m`  | 24/30 (21/25), bold |
+| Small heading, table header | `heading-s`  | 19/25, bold         |
+| Body                        | `body`       | 19/25               |
+| Hint, secondary info, tags  | `body-s`     | 16/20               |
 
 Rules: left aligned, no all caps (except inside tags), keep lines under about 75 characters, dates written as "9 December 2026".
 
@@ -152,6 +186,7 @@ Rules: left aligned, no all caps (except inside tags), keep lines under about 75
 Inspired by the DfE "Sent requests" list and the Manage accounts table.
 
 Top to bottom:
+
 1. Page title "Requests" and one line of context ("12 open, 3 overdue").
 2. **Stat tiles** (from the Notify dashboard): Overdue, Due soon, Unassigned, Flagged as FOI. Each tile is a link that filters the list. Big number (heading-xl) with label (body-s). Red text only on the overdue tile, and the label always says "overdue".
 3. Search box plus filters (Status, Owner, Flag). Button "Apply filters" (secondary) and link "Clear filters".
@@ -160,16 +195,17 @@ Top to bottom:
 
 Table columns:
 
-| Column | Notes |
-| --- | --- |
-| Reference | Link to detail page, e.g. FOI-2026-0142 |
-| Subject | One line, truncated with full text on detail page |
-| Received | "11 November 2026" |
-| Due | Date plus tag (see below) |
-| Owner | Name, or "Unassigned" tag |
-| Status | Tag |
+| Column    | Notes                                             |
+| --------- | ------------------------------------------------- |
+| Reference | Link to detail page, e.g. FOI-2026-0142           |
+| Subject   | One line, truncated with full text on detail page |
+| Received  | "11 November 2026"                                |
+| Due       | Date plus tag (see below)                         |
+| Owner     | Name, or "Unassigned" tag                         |
+| Status    | Tag                                               |
 
 Sorting:
+
 - Default sort is the deadline rule: overdue first (most overdue at the top), then soonest due, then furthest due last. Items with a missing date sit at the very top as "Deadline needs review".
 - Sortable headers are buttons with `aria-sort` (MoJ sortable table pattern). Only one column sorted at a time. Table has a `<caption>` that screen readers can hear.
 - Rows are not clickable as a whole, the reference link is the target.
@@ -178,16 +214,16 @@ Sorting:
 
 Text is always the status, never just a colour.
 
-| Tag text | Colour pair | When |
-| --- | --- | --- |
-| Overdue | red | Due date passed |
-| Due soon | orange | Within 5 working days |
-| FOI | purple | Flagged as potential FOI |
-| Needs review | yellow | Flag waiting for officer decision |
-| Unassigned | grey | No owner |
-| Deadline needs review | yellow | Date missing or unreadable |
-| Assigned / In progress | blue | Owner set |
-| Closed / Reassigned | green | Done or moved to another department |
+| Tag text               | Colour pair | When                                |
+| ---------------------- | ----------- | ----------------------------------- |
+| Overdue                | red         | Due date passed                     |
+| Due soon               | orange      | Within 5 working days               |
+| FOI                    | purple      | Flagged as potential FOI            |
+| Needs review           | yellow      | Flag waiting for officer decision   |
+| Unassigned             | grey        | No owner                            |
+| Deadline needs review  | yellow      | Date missing or unreadable          |
+| Assigned / In progress | blue        | Owner set                           |
+| Closed / Reassigned    | green       | Done or moved to another department |
 
 Show at most two tags per row (deadline tag and status tag). Tags are 16px bold with 2px 8px padding, not clickable.
 
@@ -196,6 +232,7 @@ Show at most two tags per row (deadline tag and status tag). Tags are 16px bold 
 Back link "Back to requests" at the top. Title is the reference, subtitle is the subject.
 
 **Main column (two thirds)**
+
 1. **Deadline panel.** Overdue or due soon uses a warning text pattern: "! Warning. This request is overdue by 3 working days." Otherwise normal text "Due 9 December 2026 (14 working days left)".
 2. **Request details** as a summary list: Received, Due, Sender, Channel, Subject, Original message. Long message goes in inset text or a details block.
 3. **Why this was flagged.** Plain list of the score reasons ("Mentions Freedom of Information", "Asks for recorded figures") plus the score band (high, medium, unclear). Use inset text, sparingly.
@@ -203,14 +240,17 @@ Back link "Back to requests" at the top. Title is the reference, subtitle is the
 5. **History** (audit trail). Newest first, each entry has date and time, who, and what changed ("Priya assigned this request to Sam"). Read only.
 
 **Side column (one third)**
+
 - Owner: summary list row with "Change" link (visually hidden text "Change owner"). Opens the assign form.
 - Status tag.
 - Button group: primary action only if one makes sense (e.g. "Assign owner" when unassigned), plus secondary actions as links.
 
 ### Assign owner form
+
 Select listing the fixed team (Priya, two officers, and "Me" first). Button "Save owner", link "Cancel". On success go back to detail with a success banner.
 
 ### Feedback
+
 - **Success:** green notification banner at the top of the page, with a heading "Success" and one line ("Owner changed to Sam"). Focus moves to the banner.
 - **Error:** error summary at the top ("There is a problem") with links to each field, plus an error message above the field in red bold text, prefixed "Error:". Border on the field goes red.
 - Destructive actions (none in MVP) would use a confirm step and a warning button.
@@ -219,12 +259,12 @@ Select listing the fixed team (Priya, two officers, and "Me" first). Button "Sav
 
 Learned from the CMA and Family Experience screenshots: say what is happening, say why, then give actions in a list. No sad illustrations.
 
-| Situation | Heading | Body | Actions |
-| --- | --- | --- | --- |
-| No requests at all | "There are no requests yet" | "New items will appear here when they come in." | None, or link "Check the inbox settings" |
-| Filters return nothing | "No matching results" | "There are no requests that match your search or filters." | "You can:" then list: "check your spelling", "remove a filter", "clear all filters" (link) |
-| No history yet | "No actions recorded yet" | Short line | None |
-| No flagged items | "Nothing flagged as FOI" | "Items flagged by the system will show here." | Link to all requests |
+| Situation              | Heading                     | Body                                                       | Actions                                                                                    |
+| ---------------------- | --------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| No requests at all     | "There are no requests yet" | "New items will appear here when they come in."            | None, or link "Check the inbox settings"                                                   |
+| Filters return nothing | "No matching results"       | "There are no requests that match your search or filters." | "You can:" then list: "check your spelling", "remove a filter", "clear all filters" (link) |
+| No history yet         | "No actions recorded yet"   | Short line                                                 | None                                                                                       |
+| No flagged items       | "Nothing flagged as FOI"    | "Items flagged by the system will show here."              | Link to all requests                                                                       |
 
 Layout: heading-m, body text, list, left aligned under the filters, in the same place the table would be. Announce with `role="status"` so screen readers hear the change after a search. Keep the stat tiles and filters visible so users can recover.
 
@@ -241,22 +281,22 @@ Inspired by the loading screenshot.
 
 ## 10. Components: GOV.UK to shadcn/ui
 
-| GOV.UK component | Build with |
-| --- | --- |
+| GOV.UK component                     | Build with                                                              |
+| ------------------------------------ | ----------------------------------------------------------------------- |
 | Button (default, secondary, warning) | shadcn `Button` with custom variants, square corners, 2px bottom shadow |
-| Table + MoJ sortable | shadcn `Table` plus button headers with `aria-sort` |
-| Tag | shadcn `Badge`, variants from section 3 colours |
-| Summary list | `<dl>` with grid, row borders in `--border` |
-| Pagination | shadcn `Pagination`, "Previous" and "Next" with page numbers |
-| Notification banner | shadcn `Alert` styled with blue or green top bar |
-| Warning text | Custom: bold, `!` in a black circle, 19px |
-| Inset text | Custom: 10px left border in `--govuk-border`, 15px padding |
-| Error summary / error message | `Alert` plus field level text |
-| Select, Radios, Input | shadcn primitives, 2px black border, 40px high |
-| Service navigation / Header | Custom header, dark blue `--govuk-brand-dark` |
-| Phase banner | Custom: "Beta" tag plus feedback link |
-| Stat tile | Custom card, `heading-xl` number |
-| Empty / loading | Custom (section 8 and 9) |
+| Table + MoJ sortable                 | shadcn `Table` plus button headers with `aria-sort`                     |
+| Tag                                  | shadcn `Badge`, variants from section 3 colours                         |
+| Summary list                         | `<dl>` with grid, row borders in `--border`                             |
+| Pagination                           | shadcn `Pagination`, "Previous" and "Next" with page numbers            |
+| Notification banner                  | shadcn `Alert` styled with blue or green top bar                        |
+| Warning text                         | Custom: bold, `!` in a black circle, 19px                               |
+| Inset text                           | Custom: 10px left border in `--govuk-border`, 15px padding              |
+| Error summary / error message        | `Alert` plus field level text                                           |
+| Select, Radios, Input                | shadcn primitives, 2px black border, 40px high                          |
+| Service navigation / Header          | Custom header, dark blue `--govuk-brand-dark`                           |
+| Phase banner                         | Custom: "Beta" tag plus feedback link                                   |
+| Stat tile                            | Custom card, `heading-xl` number                                        |
+| Empty / loading                      | Custom (section 8 and 9)                                                |
 
 ## 11. Accessibility checklist
 

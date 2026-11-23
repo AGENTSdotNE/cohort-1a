@@ -15,6 +15,18 @@ const badgeVariants = cva(
         outline: 'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 [a&]:hover:underline',
+        // GOV.UK-style status tags: square corners, bold, text carries the meaning (never colour alone).
+        'tag-blue': 'rounded-none bg-[var(--tag-blue-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-blue-text)]',
+        'tag-green':
+          'rounded-none bg-[var(--tag-green-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-green-text)]',
+        'tag-red': 'rounded-none bg-[var(--tag-red-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-red-text)]',
+        'tag-orange':
+          'rounded-none bg-[var(--tag-orange-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-orange-text)]',
+        'tag-yellow':
+          'rounded-none bg-[var(--tag-yellow-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-yellow-text)]',
+        'tag-purple':
+          'rounded-none bg-[var(--tag-purple-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-purple-text)]',
+        'tag-grey': 'rounded-none bg-[var(--tag-grey-bg)] px-2 py-0.5 text-base font-bold text-[var(--tag-grey-text)]',
       },
     },
     defaultVariants: {
