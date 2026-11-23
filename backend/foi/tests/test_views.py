@@ -90,59 +90,28 @@ class FOICaseListTests(APITestCase):
 
         self.assertFalse(response.data[0]['is_overdue'])
 
+    def test_the_list_is_every_item_not_just_flagged_ones(self):
+        InboundItem.objects.create(reference='PH-1', channel='phone', subject='Bins', message='When is my bin?')
 
-class ManualCreateTests(APITestCase):
+        row = self.client.get(URL).data[0]
+
+        self.assertEqual(row['status'], FOICase.Status.NOT_FOI)
+        self.assertEqual(row['confidence'], FOICase.Confidence.NOT_FLAGGED)
+
+
+class NoManualCreateTests(APITestCase):
+    """Every item gets a case automatically (see flagging.auto_flag), so there's nothing to create."""
+
     def setUp(self):
         self.user = create_user()
         self.client.force_authenticate(self.user)
 
-    def test_flagging_an_item_the_detector_missed(self):
+    def test_post_to_the_list_is_not_allowed(self):
         item = InboundItem.objects.create(reference='PH-1', channel='phone', subject='Bins', message='When is my bin?')
 
-        response = self.client.post(URL, {'item': item.id, 'decision': 'flag'}, format='json')
+        response = self.client.post(URL, {'item': item.id}, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['status'], FOICase.Status.POSSIBLE)
-        self.assertEqual(response.data['confidence'], FOICase.Confidence.MANUAL)
-
-    def test_routing_an_item_straight_to_a_department(self):
-        item = InboundItem.objects.create(
-            reference='PH-1', channel='phone', subject='Missed bin', message='Not collected.'
-        )
-
-        response = self.client.post(
-            URL, {'item': item.id, 'decision': 'route', 'department': Department.WASTE}, format='json'
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['status'], FOICase.Status.NOT_FOI)
-        self.assertEqual(response.data['department'], Department.WASTE)
-        self.assertEqual(response.data['decided_by'], self.user.email)
-
-    def test_routing_without_a_department_is_rejected(self):
-        item = InboundItem.objects.create(
-            reference='PH-1', channel='phone', subject='Missed bin', message='Not collected.'
-        )
-
-        response = self.client.post(URL, {'item': item.id, 'decision': 'route'}, format='json')
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_flagging_with_a_department_is_rejected(self):
-        item = InboundItem.objects.create(reference='PH-1', channel='phone', subject='Bins', message='When is my bin?')
-
-        response = self.client.post(
-            URL, {'item': item.id, 'decision': 'flag', 'department': Department.WASTE}, format='json'
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_an_item_that_already_has_a_case_cannot_be_flagged_again(self):
-        case = create_case()
-
-        response = self.client.post(URL, {'item': case.item_id, 'decision': 'flag'}, format='json')
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class OwnerAssignmentTests(APITestCase):
@@ -250,6 +219,17 @@ class StatusChangeTests(APITestCase):
         case = create_case(status=FOICase.Status.RESPONDED)
 
         response = self.client.post(f'{URL}{case.id}/status/', {'status': 'closed', 'note': 'Filed.'}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        case.refresh_from_db()
+        self.assertEqual(case.status, FOICase.Status.CLOSED)
+
+    def test_marking_a_not_foi_case_as_closed(self):
+        case = create_case(status=FOICase.Status.NOT_FOI)
+
+        response = self.client.post(
+            f'{URL}{case.id}/status/', {'status': 'closed', 'note': 'Passed to Waste team.'}, format='json'
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         case.refresh_from_db()
