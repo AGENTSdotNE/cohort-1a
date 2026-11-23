@@ -8,6 +8,19 @@ from .detection import score_item
 from .models import FOIAction, FOICase
 
 
+def _received_date(item: InboundItem):
+    if item.received_at is None:
+        return None
+
+    received_at = item.received_at
+    # A naive datetime (e.g. typed into the Django admin, which has no timezone widget) is local
+    # wall-clock time, the same assumption inbound/dates.py makes for the CSV seed path.
+    if timezone.is_naive(received_at):
+        received_at = timezone.make_aware(received_at)
+
+    return timezone.localtime(received_at).date()
+
+
 def auto_flag(item: InboundItem) -> FOICase | None:
     if FOICase.objects.filter(item=item).exists():
         return None
@@ -24,7 +37,7 @@ def auto_flag(item: InboundItem) -> FOICase | None:
             score=result.score,
             reasons=result.reasons,
             suggest_sar=result.suggest_sar,
-            deadline=calculate_deadline(timezone.localtime(item.received_at).date() if item.received_at else None),
+            deadline=calculate_deadline(_received_date(item)),
         )
     except IntegrityError:
         # Another request flagged the same item first; the OneToOneField constraint is the real guard.
@@ -50,9 +63,7 @@ def create_manual_case(item: InboundItem, *, decision: str, user, department: st
                     confidence=FOICase.Confidence.MANUAL,
                     score=0,
                     reasons=['Manually flagged'],
-                    deadline=calculate_deadline(
-                        timezone.localtime(item.received_at).date() if item.received_at else None
-                    ),
+                    deadline=calculate_deadline(_received_date(item)),
                 )
                 note = 'Manually flagged as possible FOI.'
             else:

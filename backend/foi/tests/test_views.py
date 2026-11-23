@@ -193,6 +193,15 @@ class DecideTests(APITestCase):
         self.assertIsNotNone(case.decided_at)
         self.assertEqual(case.actions.count(), 1)
 
+    def test_confirming_with_a_department_is_rejected(self):
+        case = create_case()
+
+        response = self.client.post(
+            f'{URL}{case.id}/decide/', {'decision': 'confirm', 'department': Department.WASTE}, format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_routing_to_a_department(self):
         case = create_case()
 

@@ -52,6 +52,16 @@ class SignalTests(TestCase):
 
         self.assertEqual(item.foi_case.deadline, calculate_deadline(date(2026, 7, 15)))
 
+    def test_a_naive_received_at_does_not_crash_the_deadline_calculation(self):
+        # e.g. typed into the Django admin, which has no timezone widget and leaves the datetime naive.
+        item = create_item(
+            subject='FOI request',
+            message='Please provide the total spent on consultants.',
+            received_at=datetime(2026, 7, 14, 23, 30),
+        )
+
+        self.assertIsNotNone(item.foi_case.deadline)
+
     def test_deadline_is_null_when_the_received_date_is_unknown(self):
         item = create_item(subject='FOI request', message='Please provide the total spent on consultants.')
 

@@ -101,6 +101,9 @@ class FOIDecisionSerializer(serializers.Serializer):
         if attrs['decision'] == 'route' and not attrs['department']:
             raise serializers.ValidationError({'department': 'This field is required when routing an item.'})
 
+        if attrs['decision'] == 'confirm' and attrs['department']:
+            raise serializers.ValidationError({'department': 'This field is not used when confirming an item.'})
+
         return attrs
 
 
