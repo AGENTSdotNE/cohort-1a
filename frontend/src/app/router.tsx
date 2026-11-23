@@ -13,6 +13,7 @@ import { ResetPasswordPage } from '@/auth/reset-password-page'
 import { SignInPage } from '@/auth/sign-in-page'
 import { SignUpPage } from '@/auth/sign-up-page'
 import { VerifyEmailPage } from '@/auth/verify-email-page'
+import { CommentPage } from '@/requests/comment-page'
 import { DashboardPage } from '@/requests/dashboard-page'
 import { RequestDetailPage } from '@/requests/request-detail-page'
 
@@ -33,6 +34,7 @@ export const AppRouter = () => (
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="requests/:id" element={<RequestDetailPage />} />
+          <Route path="requests/:id/comment" element={<CommentPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="settings/name" element={<ChangeNamePage />} />
           <Route path="settings/avatar" element={<ChangeAvatarPage />} />

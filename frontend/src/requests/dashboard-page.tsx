@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
-
 import { EmptyState, NoMatchingResults, NoRequestsYet } from './empty-state'
 import { EMPTY_FILTERS, type Filters } from './filters-state'
 import { RequestFilters } from './request-filters'
+import { RequestsPagination } from './requests-pagination'
 import { RequestsTable } from './requests-table'
 import { type SortColumn, sortRequests, type SortState } from './sorting'
 import { type QuickFilter, StatTiles } from './stat-tiles'
@@ -128,25 +127,7 @@ export const DashboardPage = () => {
         <>
           <RequestsTable cases={paginated} sort={sort} onSort={handleSort} />
 
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing {(safePage - 1) * PAGE_SIZE + 1} to {Math.min(safePage * PAGE_SIZE, sorted.length)} of{' '}
-              {sorted.length} requests
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={safePage >= totalPages}
-                onClick={() => setPage(safePage + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+          <RequestsPagination page={safePage} totalPages={totalPages} onChange={setPage} />
         </>
       )}
     </div>

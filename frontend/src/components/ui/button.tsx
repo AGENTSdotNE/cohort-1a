@@ -9,12 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        // The real GOV.UK button mechanic: a 2px "shelf" of shadow below the button, which the
+        // button drops onto (top moves down, shadow disappears) when pressed - not just a hover dim.
+        default:
+          'relative top-0 border-2 border-transparent bg-[var(--govuk-button)] font-bold text-white shadow-[0_2px_0_var(--govuk-button-shadow)] hover:bg-[var(--govuk-button-hover)] active:top-[2px] active:shadow-none',
         destructive:
-          'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40',
+          'relative top-0 border-2 border-transparent bg-[var(--govuk-button-warning)] font-bold text-white shadow-[0_2px_0_var(--govuk-button-warning-shadow)] hover:bg-[var(--govuk-button-warning-hover)] active:top-[2px] active:shadow-none',
         outline:
           'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        secondary:
+          'relative top-0 border-2 border-transparent bg-[var(--govuk-button-secondary)] font-bold text-[var(--govuk-text)] shadow-[0_2px_0_var(--govuk-button-secondary-shadow)] hover:bg-[var(--govuk-button-secondary-hover)] active:top-[2px] active:shadow-none',
         ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline',
       },

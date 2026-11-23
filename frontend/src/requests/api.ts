@@ -59,3 +59,5 @@ export const changeStatus = (id: number, body: { status: 'responded' | 'closed';
   apiRequest<FOICase>(`/foi/${id}/status/`, { body })
 
 export const addAction = (id: number, note: string) => apiRequest<FOICase>(`/foi/${id}/actions/`, { body: { note } })
+
+export const reopen = (id: number) => apiRequest<FOICase>(`/foi/${id}/reopen/`, { body: {} })

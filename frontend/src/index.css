@@ -23,11 +23,17 @@
   --govuk-panel-bg: #f3f3f3;
   --govuk-white: #ffffff;
 
-  /* Button colours */
-  --govuk-button: #0f7a52; /* green primary */
-  --govuk-button-hover: #0b5c3e;
-  --govuk-button-secondary: #f3f3f3;
-  --govuk-button-warning: #ca3535;
+  /* Button colours: the real GOV.UK Design System values, including the button's own
+     bottom-shadow colour (the 2px "edge" every GOV.UK button has beneath it). */
+  --govuk-button: #00703c; /* green primary */
+  --govuk-button-hover: #005a30;
+  --govuk-button-shadow: #002d18;
+  --govuk-button-secondary: #f3f2f1;
+  --govuk-button-secondary-hover: #dbdad9;
+  --govuk-button-secondary-shadow: #929191;
+  --govuk-button-warning: #d4351c;
+  --govuk-button-warning-hover: #aa2a16;
+  --govuk-button-warning-shadow: #55150b;
 
   /* Status tag pairs: text on background (all pass 4.5:1) */
   --tag-blue-text: #16548a;

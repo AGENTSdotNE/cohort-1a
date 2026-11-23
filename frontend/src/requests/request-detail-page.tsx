@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
-import { addAction, changeStatus, decide, DEPARTMENTS, setOwner } from './api'
+import { decide, DEPARTMENTS, reopen, setOwner } from './api'
 import { EmptyState } from './empty-state'
 import { formatDate } from './format-date'
 import { deadlineTag, statusTag } from './tags'
@@ -48,16 +48,12 @@ export const RequestDetailPage = () => {
   const feedbackRef = useRef<HTMLDivElement>(null)
   const [reviewDecision, setReviewDecision] = useState<'confirm' | 'route'>('confirm')
   const [department, setDepartment] = useState(DEPARTMENTS[0]!.value)
-  const [note, setNote] = useState('')
   const [changingOwner, setChangingOwner] = useState(false)
   const [ownerId, setOwnerId] = useState('')
 
   const decideMutation = useFOIMutation((payload: Parameters<typeof decide>[1]) => decide(foiCaseId, payload))
-  const statusMutation = useFOIMutation((payload: Parameters<typeof changeStatus>[1]) =>
-    changeStatus(foiCaseId, payload),
-  )
-  const noteMutation = useFOIMutation((noteText: string) => addAction(foiCaseId, noteText))
   const ownerMutation = useFOIMutation((owner: number | null) => setOwner(foiCaseId, owner))
+  const reopenMutation = useFOIMutation(() => reopen(foiCaseId))
 
   useEffect(() => {
     if (feedback) feedbackRef.current?.focus()
@@ -86,12 +82,7 @@ export const RequestDetailPage = () => {
       </Link>
 
       {feedback && (
-        <Alert
-          ref={feedbackRef}
-          tabIndex={-1}
-          variant={feedback.type === 'error' ? 'destructive' : 'default'}
-          className={feedback.type === 'success' ? 'border-[var(--tag-green-text)]' : ''}
-        >
+        <Alert ref={feedbackRef} tabIndex={-1} variant={feedback.type === 'error' ? 'destructive' : 'success'}>
           <AlertTitle>{feedback.type === 'success' ? 'Success' : 'There is a problem'}</AlertTitle>
           <AlertDescription>{feedback.message}</AlertDescription>
         </Alert>
@@ -114,6 +105,7 @@ export const RequestDetailPage = () => {
             <WarningText>The deadline needs review: the received date is missing or unreadable.</WarningText>
           )}
           {!due && foiCase.deadline && <p className="text-lg">Due {formatDate(foiCase.deadline)}.</p>}
+          {foiCase.status === 'closed' && <WarningText>This request is closed.</WarningText>}
 
           <dl>
             <SummaryRow
@@ -281,46 +273,24 @@ export const RequestDetailPage = () => {
           </dl>
 
           {(foiCase.status === 'confirmed' || foiCase.status === 'responded' || foiCase.status === 'not_foi') && (
-            <div className="grid gap-2 border-t border-border pt-4">
-              <textarea
-                className="min-h-20 rounded-none border-2 border-input bg-transparent px-3 py-2 text-sm"
-                placeholder="Add a note"
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-              />
-              <Button
-                size="sm"
-                disabled={!note || statusMutation.isPending}
-                onClick={() =>
-                  statusMutation.mutate(
-                    { status: foiCase.status === 'confirmed' ? 'responded' : 'closed', note },
-                    {
-                      onSuccess: () => {
-                        succeed(foiCase.status === 'confirmed' ? 'Marked as responded' : 'Marked as closed')
-                        setNote('')
-                      },
-                      onError: fail,
-                    },
-                  )
-                }
-              >
-                {foiCase.status === 'confirmed' ? 'Mark responded' : 'Mark closed'}
+            <div className="border-t border-border pt-4">
+              <Button asChild size="sm">
+                <Link to={`/requests/${foiCaseId}/comment`}>Add a comment</Link>
               </Button>
+            </div>
+          )}
+
+          {foiCase.status === 'closed' && (
+            <div className="border-t border-border pt-4">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                disabled={!note || noteMutation.isPending}
+                disabled={reopenMutation.isPending}
                 onClick={() =>
-                  noteMutation.mutate(note, {
-                    onSuccess: () => {
-                      succeed('Note added')
-                      setNote('')
-                    },
-                    onError: fail,
-                  })
+                  reopenMutation.mutate(undefined, { onSuccess: () => succeed('Request reopened'), onError: fail })
                 }
               >
-                Add note only
+                Reopen this request
               </Button>
             </div>
           )}
