@@ -47,7 +47,7 @@ export const SignUpPage = () => {
           Follow the link to confirm your address, then sign in. In development the email is printed in the Django
           terminal rather than sent.
         </p>
-        <Button asChild variant="outline" className="mt-4 w-full">
+        <Button asChild variant="outline" className="w-full">
           <Link to="/sign-in">Back to sign in</Link>
         </Button>
       </AuthCard>

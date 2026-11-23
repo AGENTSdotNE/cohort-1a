@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 
 export type QuickFilter = 'overdue' | 'due_soon' | 'unassigned' | 'foi'
 
-type Tile = { key: QuickFilter; label: string; count: number }
+export type Tile = { key: QuickFilter; label: string; count: number }
 
 export const StatTiles = ({
   tiles,

@@ -45,6 +45,47 @@ const SortableHead = ({
 // Smaller than the badge's own default size, specifically so this table never needs to scroll sideways.
 const TAG_SIZE = 'px-1.5 py-0.5 text-[11px] tracking-normal'
 
+const RequestRow = ({ foiCase }: { foiCase: FOICase }) => {
+  const due = deadlineTag(foiCase)
+  const status = statusTag(foiCase)
+
+  return (
+    <TableRow>
+      <TableCell className="p-1.5">
+        <Link to={`/requests/${foiCase.id}`} className="font-bold">
+          {foiCase.item.reference}
+        </Link>
+      </TableCell>
+      <TableCell className="max-w-32 truncate p-1.5">{foiCase.item.subject || '-'}</TableCell>
+      <TableCell className="p-1.5 whitespace-normal">
+        {foiCase.item.received_at ? formatDate(foiCase.item.received_at) : 'Unknown'}
+      </TableCell>
+      <TableCell className="p-1.5 whitespace-normal">
+        <div className="flex flex-col gap-1">
+          <span>{foiCase.deadline ? formatDate(foiCase.deadline) : '-'}</span>
+          {due && (
+            <Badge variant={due.variant} className={TAG_SIZE}>
+              {due.label}
+            </Badge>
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="max-w-28 truncate p-1.5">
+        {foiCase.owner ?? (
+          <Badge variant="tag-grey" className={TAG_SIZE}>
+            Unassigned
+          </Badge>
+        )}
+      </TableCell>
+      <TableCell className="p-1.5">
+        <Badge variant={status.variant} className={TAG_SIZE}>
+          {status.label}
+        </Badge>
+      </TableCell>
+    </TableRow>
+  )
+}
+
 export const RequestsTable = ({
   cases,
   sort,
@@ -70,46 +111,9 @@ export const RequestsTable = ({
       </TableRow>
     </TableHeader>
     <TableBody>
-      {cases.map((foiCase) => {
-        const due = deadlineTag(foiCase)
-        const status = statusTag(foiCase)
-
-        return (
-          <TableRow key={foiCase.id}>
-            <TableCell className="p-1.5">
-              <Link to={`/requests/${foiCase.id}`} className="font-bold">
-                {foiCase.item.reference}
-              </Link>
-            </TableCell>
-            <TableCell className="max-w-32 truncate p-1.5">{foiCase.item.subject || '-'}</TableCell>
-            <TableCell className="p-1.5 whitespace-normal">
-              {foiCase.item.received_at ? formatDate(foiCase.item.received_at) : 'Unknown'}
-            </TableCell>
-            <TableCell className="p-1.5 whitespace-normal">
-              <div className="flex flex-col gap-1">
-                <span>{foiCase.deadline ? formatDate(foiCase.deadline) : '-'}</span>
-                {due && (
-                  <Badge variant={due.variant} className={TAG_SIZE}>
-                    {due.label}
-                  </Badge>
-                )}
-              </div>
-            </TableCell>
-            <TableCell className="max-w-28 truncate p-1.5">
-              {foiCase.owner ?? (
-                <Badge variant="tag-grey" className={TAG_SIZE}>
-                  Unassigned
-                </Badge>
-              )}
-            </TableCell>
-            <TableCell className="p-1.5">
-              <Badge variant={status.variant} className={TAG_SIZE}>
-                {status.label}
-              </Badge>
-            </TableCell>
-          </TableRow>
-        )
-      })}
+      {cases.map((foiCase) => (
+        <RequestRow key={foiCase.id} foiCase={foiCase} />
+      ))}
     </TableBody>
   </Table>
 )

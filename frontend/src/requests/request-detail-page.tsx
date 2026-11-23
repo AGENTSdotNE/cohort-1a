@@ -1,41 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+import { LoadingState } from '@/components/loading-state'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Select } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
+import { InsetText } from '@/components/ui/inset-text'
+import { SummaryRow } from '@/components/ui/summary-row'
+import { WarningText } from '@/components/ui/warning-text'
 
-import { decide, DEPARTMENTS, reopen } from './api'
+import { reopen } from './api'
+import { CaseHistoryPanel } from './case-history-panel'
 import { EmptyState } from './empty-state'
 import { formatDate } from './format-date'
+import { ReviewDecisionForm } from './review-decision-form'
 import { deadlineTag, statusTag } from './tags'
 import { useFOICase, useFOIMutation } from './use-requests'
 
 type Feedback = { type: 'success' | 'error'; message: string } | null
-
-const SummaryRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
-  <div className="grid grid-cols-3 gap-4 border-b border-border py-3">
-    <dt className="font-bold">{label}</dt>
-    <dd className="col-span-2">{value}</dd>
-  </div>
-)
-
-const WarningText = ({ children }: { children: React.ReactNode }) => (
-  <p className="flex items-start gap-2 text-lg font-bold text-[var(--tag-red-text)]">
-    <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full bg-current">
-      <span className="text-sm font-bold text-white">!</span>
-    </span>
-    <span>
-      <span className="sr-only">Warning</span> {children}
-    </span>
-  </p>
-)
-
-const InsetText = ({ children }: { children: React.ReactNode }) => (
-  <div className="border-l-4 border-border pl-4">{children}</div>
-)
 
 export const RequestDetailPage = () => {
   const { id } = useParams()
@@ -44,17 +26,14 @@ export const RequestDetailPage = () => {
 
   const [feedback, setFeedback] = useState<Feedback>(null)
   const feedbackRef = useRef<HTMLDivElement>(null)
-  const [reviewDecision, setReviewDecision] = useState<'confirm' | 'route'>('confirm')
-  const [department, setDepartment] = useState(DEPARTMENTS[0]!.value)
 
-  const decideMutation = useFOIMutation((payload: Parameters<typeof decide>[1]) => decide(foiCaseId, payload))
   const reopenMutation = useFOIMutation(() => reopen(foiCaseId))
 
   useEffect(() => {
     if (feedback) feedbackRef.current?.focus()
   }, [feedback])
 
-  if (isPending) return <Skeleton className="mt-6 h-96 max-w-5xl" />
+  if (isPending) return <LoadingState label="Loading request" />
 
   if (isError) {
     return (
@@ -89,7 +68,7 @@ export const RequestDetailPage = () => {
         <p className="mt-1 text-lg text-muted-foreground">{foiCase.item.subject || 'No subject'}</p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid items-start gap-8 lg:grid-cols-3">
         <div className="grid gap-6 lg:col-span-2">
           {due?.label === 'Overdue' && foiCase.deadline && (
             <WarningText>This request is overdue. It was due {formatDate(foiCase.deadline)}.</WarningText>
@@ -148,56 +127,9 @@ export const RequestDetailPage = () => {
           </div>
 
           {foiCase.status === 'possible' ? (
-            <div className="grid gap-3 border-t border-border pt-4">
-              <h2 className="text-xl font-bold">Review decision</h2>
-              <fieldset className="grid gap-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={reviewDecision === 'confirm'}
-                    onChange={() => setReviewDecision('confirm')}
-                  />
-                  This is an FOI request
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={reviewDecision === 'route'}
-                    onChange={() => setReviewDecision('route')}
-                  />
-                  This is not an FOI request, send to another department
-                </label>
-              </fieldset>
-
-              {reviewDecision === 'route' && (
-                <Select className="w-56" value={department} onChange={(event) => setDepartment(event.target.value)}>
-                  {DEPARTMENTS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              )}
-
-              <Button
-                className="w-fit"
-                disabled={decideMutation.isPending}
-                onClick={() =>
-                  decideMutation.mutate(
-                    reviewDecision === 'confirm' ? { decision: 'confirm' } : { decision: 'route', department },
-                    {
-                      onSuccess: () =>
-                        succeed(reviewDecision === 'confirm' ? 'Confirmed as FOI' : 'Sent to department'),
-                      onError: fail,
-                    },
-                  )
-                }
-              >
-                Confirm decision
-              </Button>
-            </div>
+            <ReviewDecisionForm foiCaseId={foiCaseId} onSuccess={succeed} onError={fail} />
           ) : (
-            <p className="border-t border-border pt-4 text-sm text-muted-foreground">
+            <p className="border-t border-border pt-4">
               {foiCase.decided_by && foiCase.decided_at
                 ? `Decided by ${foiCase.decided_by} on ${formatDate(foiCase.decided_at)}.`
                 : 'The system did not flag this as a possible FOI request.'}
@@ -219,38 +151,15 @@ export const RequestDetailPage = () => {
           ) : (
             canComment && (
               <div className="border-t border-border pt-4">
-                <Button asChild>
-                  <Link to={`/requests/${foiCaseId}/comment`}>Add a comment</Link>
+                <Button asChild size="lg">
+                  <Link to={`/requests/${foiCaseId}/comment`}>Respond</Link>
                 </Button>
               </div>
             )
           )}
         </div>
 
-        <div className="grid gap-3">
-          <h2 className="text-xl font-bold">History</h2>
-          {foiCase.actions.length === 0 ? (
-            <p role="status" className="text-sm text-muted-foreground">
-              No actions recorded yet.
-            </p>
-          ) : (
-            <>
-              <div className="grid gap-3">
-                {foiCase.actions.slice(0, 2).map((action) => (
-                  <div key={action.id} className="border-b border-border pb-3 text-sm">
-                    <p className="text-muted-foreground">
-                      {formatDate(action.created_at)} &middot; {action.created_by ?? 'system'}
-                    </p>
-                    <p>{action.note}</p>
-                  </div>
-                ))}
-              </div>
-              <Link to={`/requests/${foiCaseId}/history`} className="text-sm">
-                All history
-              </Link>
-            </>
-          )}
-        </div>
+        <CaseHistoryPanel foiCaseId={foiCaseId} actions={foiCase.actions} />
       </div>
     </div>
   )

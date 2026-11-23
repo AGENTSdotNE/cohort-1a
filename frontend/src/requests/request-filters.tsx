@@ -22,6 +22,37 @@ const FLAG_OPTIONS = [
   { value: 'not_flagged', label: 'Not flagged' },
 ]
 
+const ownerOptions = (users: UserSummary[]) => [
+  { value: '', label: 'Any owner' },
+  { value: 'unassigned', label: 'Unassigned' },
+  ...users.map((user) => ({ value: user.email, label: user.full_name || user.email })),
+]
+
+const SelectFilter = ({
+  id,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  id: string
+  label: string
+  value: string
+  options: { value: string; label: string }[]
+  onChange: (value: string) => void
+}) => (
+  <div className="grid gap-1">
+    <Label htmlFor={id}>{label}</Label>
+    <Select id={id} className="w-44" value={value} onChange={(event) => onChange(event.target.value)}>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </Select>
+  </div>
+)
+
 export const RequestFilters = ({
   filters,
   onChange,
@@ -46,55 +77,29 @@ export const RequestFilters = ({
         />
       </div>
 
-      <div className="grid gap-1">
-        <Label htmlFor="status-filter">Status</Label>
-        <Select
-          id="status-filter"
-          className="w-44"
-          value={filters.status}
-          onChange={(event) => onChange({ ...filters, status: event.target.value })}
-        >
-          {STATUS_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <SelectFilter
+        id="status-filter"
+        label="Status"
+        value={filters.status}
+        options={STATUS_OPTIONS}
+        onChange={(status) => onChange({ ...filters, status })}
+      />
 
-      <div className="grid gap-1">
-        <Label htmlFor="owner-filter">Owner</Label>
-        <Select
-          id="owner-filter"
-          className="w-44"
-          value={filters.owner}
-          onChange={(event) => onChange({ ...filters, owner: event.target.value })}
-        >
-          <option value="">Any owner</option>
-          <option value="unassigned">Unassigned</option>
-          {users.map((user) => (
-            <option key={user.id} value={user.email}>
-              {user.full_name || user.email}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <SelectFilter
+        id="owner-filter"
+        label="Owner"
+        value={filters.owner}
+        options={ownerOptions(users)}
+        onChange={(owner) => onChange({ ...filters, owner })}
+      />
 
-      <div className="grid gap-1">
-        <Label htmlFor="flag-filter">Flag</Label>
-        <Select
-          id="flag-filter"
-          className="w-44"
-          value={filters.flag}
-          onChange={(event) => onChange({ ...filters, flag: event.target.value })}
-        >
-          {FLAG_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <SelectFilter
+        id="flag-filter"
+        label="Flag"
+        value={filters.flag}
+        options={FLAG_OPTIONS}
+        onChange={(flag) => onChange({ ...filters, flag })}
+      />
 
       {hasFilters && (
         <button type="button" className="text-sm underline" onClick={() => onChange(EMPTY_FILTERS)}>

@@ -1,17 +1,9 @@
-import { signOut } from '@/auth/api'
 import { useUser } from '@/auth/use-user'
-import { Button } from '@/components/ui/button'
-import { clearSession } from '@/lib/query-client'
 
 import { SettingsRow } from './settings-row'
 
 export const SettingsPage = () => {
   const user = useUser()
-
-  const leave = async () => {
-    await signOut()
-    clearSession()
-  }
 
   return (
     <div className="grid max-w-3xl gap-6 px-6 py-6">
@@ -27,13 +19,6 @@ export const SettingsPage = () => {
         />
         <SettingsRow label="Password" value="••••••••" changeTo="/settings/password" />
       </dl>
-
-      <div>
-        <h2 className="mb-2 text-xl font-bold">Sign out</h2>
-        <Button variant="outline" onClick={() => void leave()}>
-          Sign out
-        </Button>
-      </div>
     </div>
   )
 }

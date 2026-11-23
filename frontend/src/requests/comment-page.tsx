@@ -64,7 +64,7 @@ export const CommentPage = () => {
       </Link>
 
       <div>
-        <h1 className="text-3xl font-bold">Add a comment</h1>
+        <h1 className="text-3xl font-bold">Respond</h1>
         <p className="mt-2 text-muted-foreground">
           Record what has happened with this request. Other officers will see this in the request's history.
         </p>
