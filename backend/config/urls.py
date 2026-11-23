@@ -9,6 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.urls')),
     path('api/', include('inbound.urls')),
+    path('api/', include('foi.urls')),
 ]
 
 # Django serves uploads itself so staging works too. A real production app keeps them in object storage.
