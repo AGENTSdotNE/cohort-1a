@@ -1,4 +1,4 @@
-import { Inbox, LayoutDashboard } from 'lucide-react'
+import { FileSearch, Inbox, LayoutDashboard } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 const LINKS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/inbound', label: 'Inbound', icon: Inbox },
+  { to: '/foi', label: 'FOI requests', icon: FileSearch },
 ]
 
 export const AppNav = ({ onNavigate }: { onNavigate?: () => void }) => (
